@@ -1,0 +1,330 @@
+<template>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Iniciar Sesión</h2>
+        <p>Bienvenido de vuelta a Level Up</p>
+      </div>
+
+      <form @submit.prevent="handleLogin" class="login-form">
+        <div class="form-group">
+          <label for="email">Correo Electrónico</label>
+          <input
+            type="email"
+            id="email"
+            v-model="loginData.email"
+            placeholder="tu@email.com"
+            required
+          />
+          <small class="form-hint">
+            💡 Demo: usa "admin@levelup.com" para acceso administrador
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            v-model="loginData.password"
+            placeholder="••••••••"
+            required
+          />
+          <small class="form-hint"> 💡 Demo: cualquier contraseña funciona </small>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="loginData.remember" />
+            <span class="checkmark"></span>
+            Recordarme
+          </label>
+          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-login" :disabled="loading">
+          <span v-if="loading">Iniciando sesión...</span>
+          <span v-else>Iniciar Sesión</span>
+        </button>
+
+        <!-- Demo Info -->
+        <div class="demo-info">
+          <h4>🔐 Accesos de Demo:</h4>
+          <div class="demo-accounts">
+            <div class="demo-account">
+              <strong>Administrador:</strong> admin@levelup.com / cualquier contraseña
+            </div>
+            <div class="demo-account">
+              <strong>Usuario Normal:</strong> usuario@levelup.com / cualquier contraseña
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="login-footer">
+        <p>
+          ¿No tienes una cuenta?
+          <a href="#" @click.prevent="goToRegister" class="link">Regístrate aquí</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'LoginPage',
+  data() {
+    return {
+      loginData: {
+        email: '',
+        password: '',
+        remember: false,
+      },
+      loading: false,
+    }
+  },
+  methods: {
+    async handleLogin() {
+      this.loading = true
+
+      try {
+        // Simular autenticación
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+
+        // Determinar rol basado en el email
+        let userRole = 'user'
+        let userName = 'Usuario'
+
+        if (this.loginData.email.includes('admin')) {
+          userRole = 'admin'
+          userName = 'Administrador'
+        }
+
+        // Crear datos de usuario
+        const userData = {
+          email: this.loginData.email,
+          name: userName,
+          role: userRole,
+        }
+
+        // Emitir evento de login exitoso
+        this.$emit('login-success', userData)
+      } catch (error) {
+        console.error('Error en login:', error)
+        alert('Error al iniciar sesión. Verifica tus credenciales.')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    goToRegister() {
+      this.$emit('change-auth-mode', 'register')
+    },
+  },
+}
+</script>
+
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 40px 20px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  color: #6e6e73;
+  font-size: 16px;
+}
+
+.login-form {
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d2d2d7;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.form-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #8e8e93;
+  font-style: italic;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #1d1d1f;
+}
+
+.checkbox-label input {
+  margin-right: 8px;
+}
+
+.forgot-password {
+  color: #0071e3;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.btn-login {
+  width: 100%;
+  background: linear-gradient(135deg, #0071e3, #0077ed);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.btn-login:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 113, 227, 0.3);
+}
+
+.btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.demo-info {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 20px;
+  border-left: 4px solid #0071e3;
+}
+
+.demo-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+.demo-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-account {
+  font-size: 12px;
+  color: #6e6e73;
+  line-height: 1.4;
+}
+
+.demo-account strong {
+  color: #1d1d1f;
+}
+
+.login-footer {
+  text-align: center;
+  border-top: 1px solid #d2d2d7;
+  padding-top: 20px;
+}
+
+.login-footer p {
+  color: #6e6e73;
+  margin: 0;
+}
+
+.link {
+  color: #0071e3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .demo-info {
+    padding: 12px;
+  }
+
+  .demo-accounts {
+    font-size: 11px;
+  }
+}
+</style>

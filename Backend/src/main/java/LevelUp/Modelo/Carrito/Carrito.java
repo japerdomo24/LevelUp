@@ -5,11 +5,11 @@ import java.util.List;
 
 public class Carrito {
 
-    private String correoUsuario; // El "dueño" del carrito
+    private String correoUsuario;
     private List<ItemCarrito> items;
     private double total;
 
-    // Constructor vacío para Jackson
+    // Constructor vacío
     public Carrito() {
         this.items = new ArrayList<>();
         this.total = 0.0;

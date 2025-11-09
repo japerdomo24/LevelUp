@@ -1,0 +1,9 @@
+[ {
+  "correo" : "japerdomo.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$jwoqEEbPWrtDfFiidL.kW.4OJFx/dq0PPlqCEzEZJhxhUAULKupoO",
+  "rol" : "admin"
+}, {
+  "correo" : "ejemplo.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$8k./owFpYZpQPMnFlGBh/eEH.jP/lvvoe9oCo4.GPpV1IyXXCo8Dm",
+  "rol" : "user"
+} ]

@@ -1,0 +1,45 @@
+[ {
+  "id" : "a42a2dfe-d23a-4b0e-98e1-9f763786cb51",
+  "tipo" : "iPad",
+  "serie" : "iPad Pro",
+  "modelo" : "11-inch",
+  "colores" : [ "Plata", "Gris espacial" ],
+  "capacidades" : [ "128GB", "256GB" ],
+  "configSim" : "Wi-Fi",
+  "precio" : 799.0,
+  "cantidad" : 40,
+  "imagen" : "https://example.com/images/ipad-pro-11.jpg"
+}, {
+  "id" : "9ce82474-ad77-4e99-94a7-02773f152002",
+  "tipo" : "Mac",
+  "serie" : "MacBook Air 13",
+  "modelo" : "M2",
+  "colores" : [ "Medianoche", "Blanco estrella", "Gris espacial" ],
+  "capacidades" : [ "256GB", "512GB" ],
+  "configSim" : "N/A",
+  "precio" : 1099.0,
+  "cantidad" : 30,
+  "imagen" : "https://example.com/images/macbook-air-m2.jpg"
+}, {
+  "id" : "dc5af09b-a0ae-4538-a946-4922a8ef7eb4",
+  "tipo" : "Accesorio",
+  "serie" : "AirPods",
+  "modelo" : "Pro (2da gen)",
+  "colores" : [ "Blanco" ],
+  "capacidades" : [ "N/A" ],
+  "configSim" : "N/A",
+  "precio" : 249.0,
+  "cantidad" : 150,
+  "imagen" : "https://example.com/images/airpods-pro-2.jpg"
+}, {
+  "id" : "3cd79ff6-7c06-4b17-acb0-8b4662245a1c",
+  "tipo" : "iPhone",
+  "serie" : "iPhone 15",
+  "modelo" : "Pro",
+  "colores" : [ "Titanio natural", "Titanio azul", "Titanio negro" ],
+  "capacidades" : [ "128GB", "256GB", "512GB" ],
+  "configSim" : "eSIM",
+  "precio" : 999.99,
+  "cantidad" : 75,
+  "imagen" : "https://example.com/images/iphone-15-pro.jpg"
+} ]

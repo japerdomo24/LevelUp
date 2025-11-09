@@ -1,0 +1,26 @@
+[
+  {
+    "id": "prov-uuid-001",
+    "rif": "J-12345678-9",
+    "nombre": "Apple Inc. (Distribuidor Oficial)",
+    "telefono": "+1-800-MY-APPLE",
+    "correo": "business@apple.com",
+    "direccion": "1 Apple Park Way, Cupertino, CA",
+    "facturas": [
+      "ORD-2025-001",
+      "ORD-2025-005"
+    ]
+  },
+  {
+    "id": "prov-uuid-002",
+    "rif": "J-98765432-1",
+    "nombre": "Accesorios Tech Vzla",
+    "telefono": "+58-212-555-1234",
+    "correo": "ventas@acctech.com",
+    "direccion": "Av. Principal, Caracas",
+    "facturas": [
+      "F-0010",
+      "F-0025"
+    ]
+  }
+]

@@ -121,8 +121,9 @@ import Swal from 'sweetalert2'
 // --- Configuración de Toast (SOLO PARA 'ADD-TO-CART') ---
 const Toast = Swal.mixin({
   toast: true,
-  position: 'top-end',
-  showConfirmButton: false,
+  position: 'middle',
+  showConfirmButton: true,
+  confirmButtonColor: '#0071e3',
   timer: 3000,
   timerProgressBar: true,
 })
@@ -197,27 +198,62 @@ export default {
           headers: { Authorization: `Bearer ${this.token}` }
         });
 
-        // --- ¡EL ÚNICO TOAST PERMITIDO! ---
+        //Notificaciones de agregar un producto al carrito
         Toast.fire({
           icon: 'success',
           title: `¡${cartItem.serie} añadido al carrito!`
-        })
-
-        this.cambiarPagina('products', this.selectedProduct.tipo);
-
+        }).then(()=> {
+          Swal.fire({
+            title: "¿Deseas agregar otro producto al carrito?",
+            showDenyButton: true,
+            denyButtonText: "No",
+            confirmButtonText: "Si",
+            denyButtonColor: '#d2d2d7',
+            confirmButtonColor: '#0071e3',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.cambiarPagina('products', this.selectedProduct.tipo);;
+            } else if (result.isDenied) {
+              this.cambiarPagina('cart');;
+            }
+          });
+       });
+       //manejo de errores y notificaciones requeridas
       } catch (error) {
         if (error.response && error.response.status === 409) {
+          // Manejo del Caso: Producto no disponible en cantidades solicitadas
           Swal.fire({
             icon: 'error',
             title: '¡Stock insuficiente!',
+            text: 'Este producto no se encuentra disponible en las cantidades que solicita. ¿Deseas agregar este mismo producto con una cantidad distinta?',
+            showDenyButton: true,
+            denyButtonText: "No",
+            confirmButtonText: "Si",
+            denyButtonColor: '#d2d2d7',
             confirmButtonColor: '#0071e3',
-          })
-        } else {
+          }).then((result) => {
+            if (result.isConfirmed) {
+              return;;
+            } else if (result.isDenied) {
+              this.cambiarPagina('products', this.selectedProduct.tipo);;
+            }
+          });
+        } else if (error.response && error.response.status === 404) {
+            // Manejo del Caso: Producto no disponible
           Swal.fire({
             icon: 'error',
-            title: 'Error al añadir el producto',
+            title: 'Producto No Disponible',
+            text: 'Producto no disponible, inténtelo más tarde.',
             confirmButtonColor: '#0071e3',
           })
+          this.cambiarPagina('products', this.selectedProduct.tipo);
+        }  else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Se ha producido un error al añadir un producto',
+            confirmButtonColor: '#0071e3',
+          })
+          this.cambiarPagina('products', this.selectedProduct.tipo);
         }
       }
     },

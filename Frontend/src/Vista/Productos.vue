@@ -25,9 +25,9 @@
           <span class="product-price"
           >${{ formatearPrecio(product.precio) }}</span
           >
-          <span class="product-stock" :class="obtenerClaseStock(product)">
+          <!--<span class="product-stock" :class="obtenerClaseStock(product)">
             {{ obtenerTextoStock(product) }}
-          </span>
+          </span>//-->
         </div>
         <button class="btn">Ver detalles</button>
       </div>

@@ -58,30 +58,42 @@ public class CarritoController {
                                              @RequestBody AgregarItemDTO dto) {
         
         String correoUsuario = authentication.getName();
+        List<Carrito> todosLosCarritos = manejadorCarrito.leerCarritos();
+        List<Producto> productos = manejadorProducto.leerProductos();
+        Carrito miCarrito = obtenerOCrearCarrito(todosLosCarritos, correoUsuario);
 
         // 1. Validar producto y stock
         Optional<Producto> productoOpt = manejadorProducto.leerProductos().stream()
                 .filter(p -> p.getId().equals(dto.productoId()))
                 .findFirst();
-        if (productoOpt.isEmpty()) {
+        if (productoOpt.isEmpty()) { //404
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); 
         }
-        if (productoOpt.get().getCantidad() < dto.cantidad()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null); 
-        }
+        Producto producto = productoOpt.get();
 
-        // 2. Obtener carrito y agregar item
-        List<Carrito> todosLosCarritos = manejadorCarrito.leerCarritos();
-        Carrito miCarrito = obtenerOCrearCarrito(todosLosCarritos, correoUsuario);
-
-        Optional<ItemCarrito> itemExistente = miCarrito.getItems().stream()
+        // 2. Determinar la cantidad total deseada y el stock actual
+        Optional<ItemCarrito> itemExistenteOpt = miCarrito.getItems().stream()
                 .filter(item -> item.getProductoId().equals(dto.productoId()))
                 .findFirst();
 
-        if (itemExistente.isPresent()) {
-            itemExistente.get().setCantidad(itemExistente.get().getCantidad() + dto.cantidad());
+        int cantidadEnCarrito = itemExistenteOpt.map(ItemCarrito::getCantidad).orElse(0);
+        int cantidadTotalDeseada = cantidadEnCarrito + dto.cantidad();
+        int stockDisponible = producto.getCantidad();
+
+        // 3. Validar el stock total
+        if (stockDisponible < cantidadTotalDeseada) {
+            // Caso 2: Stock insuficiente
+            // Se utiliza 409 CONFLICT para indicar un problema de stock
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+
+        //4. Agregar o actualizar item
+
+        if (itemExistenteOpt.isPresent()) {
+            // Actualizar la cantidad sumando la nueva cantidad
+            itemExistenteOpt.get().setCantidad(cantidadTotalDeseada);
         } else {
-            Producto producto = productoOpt.get();
+            // Crear nuevo item
             ItemCarrito nuevoItem = new ItemCarrito(
                     producto.getId(), producto.getSerie(),
                     dto.cantidad(), producto.getPrecio()
@@ -89,7 +101,7 @@ public class CarritoController {
             miCarrito.getItems().add(nuevoItem);
         }
 
-        // 3. Recalcular y guardar
+        // 5. Recalcular y guardar
         miCarrito.calcularTotal();
         manejadorCarrito.guardarCarritos(todosLosCarritos);
 

@@ -44,6 +44,17 @@
         <div class="info-tag">{{ product.configSim }}</div>
       </div>
 
+      <div class="option-group" v-if="user?.rol !== 'admin'">
+        <div class="option-title">Cantidad:</div>
+        <input
+          type="number"
+          v-model.number="quantity"
+          class="ingreso-cantidad"
+          min="1"
+          max="99"
+        />
+</div>
+
       <div class="option-group final-step">
         <div class="option-title">¿Todo listo?</div>
 
@@ -85,6 +96,7 @@ export default {
         color: '',
         capacity: '',
       },
+      quantity: 1,
     }
   },
   computed: {
@@ -98,14 +110,14 @@ export default {
         this.product.capacidades.length > 0 &&
         !(this.product.capacidades.length === 1 && this.product.capacidades[0] === 'N/A');
     },
-    mostrarConfigSim() { // <-- Traducido
+    mostrarConfigSim() {
       return this.product.configSim && this.product.configSim !== 'N/A';
     }
   },
-  // --- MÉTODOS TRADUCIDOS ---
+
   methods: {
     agregarAlCarrito() {
-      const opcionesRequeridas = [] // <-- Traducido
+      const opcionesRequeridas = []
       if (this.mostrarColores) {
         opcionesRequeridas.push({ key: 'color', name: 'Color' });
       }
@@ -129,7 +141,7 @@ export default {
         ...this.product,
         selectedColor: this.opcionesSeleccionadas.color,
         selectedCapacity: this.opcionesSeleccionadas.capacity,
-        quantity: 1,
+        quantity: this.quantity,
       }
 
       this.$emit('add-to-cart', itemCarrito)
@@ -233,6 +245,13 @@ export default {
   background-color: #f5f5f7;
   color: #1d1d1f;
   display: inline-block;
+}
+.ingreso-cantidad{
+  width: 80px;
+  padding: 10px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  font-size: 16px;
 }
 .final-step {
   border-top: 1px solid #eee;

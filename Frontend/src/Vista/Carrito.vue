@@ -1,7 +1,7 @@
 <template>
   <div class="cart">
     <div class="cart-container">
-      <h2 class="cart-title">Carrito</h2>
+      <h2 class="cart-title">Mi Carrito</h2>
 
       <div v-if="loading" class="cart-empty">
         <p>Cargando tu carrito...</p>
@@ -27,9 +27,6 @@
               ${{ formatearPrecio(item.precioUnitario * item.cantidad) }}
             </div>
 
-            <button class="btn-delete" @click="manejarEliminacion(item.productoId)">
-              &times;
-            </button>
           </div>
         </div>
 
@@ -39,15 +36,6 @@
             <span>${{ formatearPrecio(carrito.total) }}</span>
           </div>
 
-          <div class="cart-actions">
-            <button class="btn-secondary" @click="irATienda">Seguir Viendo</button>
-            <button
-              class="btn-primary"
-              @click="manejarCheckout"
-              :disabled="loadingCheckout">
-              {{ loadingCheckout ? 'Procesando...' : 'Ir a Pagar' }}
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -55,7 +43,7 @@
 </template>
 
 <script>
-import apiClient from '@/api/axiosConfig.js'
+import apiClient from '@/api/axiosConfig'
 import Swal from 'sweetalert2'
 
 export default {
@@ -64,13 +52,12 @@ export default {
     return {
       carrito: null,
       loading: true,
-      loadingCheckout: false,
+      // loadingCheckout: false, // Ya no es necesario
     }
   },
   mounted() {
-    this.cargarCarrito(); // <-- Traducido
+    this.cargarCarrito();
   },
-  // --- MÉTODOS TRADUCIDOS ---
   methods: {
     async cargarCarrito() {
       this.loading = true;
@@ -99,102 +86,9 @@ export default {
       }
     },
 
-    async manejarEliminacion(productoId) {
-      const token = localStorage.getItem('userToken');
-
-      const result = await Swal.fire({
-        title: '¿Eliminar producto?',
-        text: "El producto se quitará de tu carrito.",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#0071e3',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      })
-
-      if (result.isConfirmed) {
-        try {
-          const response = await apiClient.delete(`/carrito/${productoId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          this.carrito = response.data; // Actualiza el carrito
-          Swal.fire({
-            icon: 'success',
-            title: 'Producto eliminado',
-            timer: 2000,
-            showConfirmButton: false,
-          });
-
-        } catch (error) {
-          console.error("Error eliminando item:", error);
-          Swal.fire({
-            icon: 'error',
-            title: 'No se pudo eliminar',
-            confirmButtonColor: '#0071e3',
-          });
-        }
-      }
-    },
-
-    async manejarCheckout() {
-      const token = localStorage.getItem('userToken');
-
-      const result = await Swal.fire({
-        title: '¿Confirmar Compra?',
-        text: `El total es $${this.formatearPrecio(this.carrito.total)}. Esta acción generará una factura y descontará el stock.`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#0071e3',
-        cancelButtonColor: '#6e6e73',
-        confirmButtonText: 'Sí, pagar',
-        cancelButtonText: 'Cancelar'
-      })
-
-      if (!result.isConfirmed) return;
-
-      this.loadingCheckout = true;
-      try {
-        const response = await apiClient.post('/carrito/facturar', {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        await Swal.fire({
-          icon: 'success',
-          title: '¡Compra exitosa!',
-          text: `Se ha generado tu factura ID: ${response.data.id}`,
-          confirmButtonColor: '#0071e3',
-        });
-
-        this.irATienda(); // Envía al inicio
-
-      } catch (error) {
-        if (error.response && error.response.status === 409) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Stock insuficiente',
-            text: 'Uno de los productos en tu carrito se ha agotado.',
-            confirmButtonColor: '#0071e3',
-          });
-          this.cargarCarrito(); // Recarga el carrito
-        } else if (error.response && error.response.status === 400) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Tu carrito está vacío',
-            confirmButtonColor: '#0071e3',
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al procesar la compra',
-            confirmButtonColor: '#0071e3',
-          });
-        }
-      } finally {
-        this.loadingCheckout = false;
-      }
-    },
+    // --- Métodos ELIMINADOS ---
+    // async manejarEliminacion(productoId) { ... }
+    // async manejarCheckout() { ... }
 
     formatearPrecio(value) {
       if (!value) return '0,00'
@@ -279,21 +173,11 @@ export default {
   font-weight: 700;
   font-size: 18px;
   color: #1d1d1f;
+  margin-left: 20px; /* Añade espacio a la derecha */
 }
 
-.btn-delete {
-  background: transparent;
-  border: none;
-  color: #ff3b30;
-  font-size: 24px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0 10px;
-  transition: transform 0.2s ease;
-}
-.btn-delete:hover {
-  transform: scale(1.2);
-}
+/* --- Estilos ELIMINADOS --- */
+/* .btn-delete { ... } */
 
 
 .cart-summary {
@@ -314,13 +198,11 @@ export default {
   margin-left: 10px;
 }
 
-.cart-actions {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
-}
+/* --- Estilos ELIMINADOS --- */
+/* .cart-actions { ... } */
+/* .btn-primary, .btn-secondary { ... } */
 
-.btn-primary,
+/* Estilo para el botón de "Ir a la tienda" en el estado vacío */
 .btn-secondary {
   border: none;
   border-radius: 8px;
@@ -329,21 +211,6 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #007aff;
-  color: white;
-}
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-.btn-primary:disabled {
-  background-color: #8e8e93;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
   background-color: #e5e5ea;
   color: #1d1d1f;
 }

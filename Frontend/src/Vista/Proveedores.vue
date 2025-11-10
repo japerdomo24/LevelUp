@@ -116,7 +116,6 @@
 
           <div class="supplier-actions">
             <button class="btn-edit" @click="editarProveedor(proveedor)">✏️ Editar</button>
-            <button class="btn-delete" @click="eliminarProveedor(proveedor.id)">🗑️ Eliminar</button>
           </div>
         </div>
       </div>
@@ -353,50 +352,6 @@ export default {
         });
       } finally {
         this.loading = false
-      }
-    },
-
-    async eliminarProveedor(proveedorId) {
-      const result = await Swal.fire({
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir esta acción!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6e6e73',
-        confirmButtonText: 'Sí, eliminarlo',
-        cancelButtonText: 'Cancelar'
-      })
-
-      if (result.isConfirmed) {
-        this.loading = true;
-        const token = localStorage.getItem('userToken');
-
-        try {
-          await apiClient.delete(`/proveedores/${proveedorId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          this.proveedores = this.proveedores.filter((s) => s.id !== proveedorId)
-          Swal.fire({
-            icon: 'success',
-            title: '¡Eliminado!',
-            text: 'El proveedor ha sido eliminado.',
-            timer: 2000,
-            showConfirmButton: false,
-          });
-
-        } catch (error) {
-          console.error('Error eliminando proveedor:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo eliminar el proveedor.',
-            confirmButtonColor: '#0071e3',
-          });
-        } finally {
-          this.loading = false;
-        }
       }
     },
 

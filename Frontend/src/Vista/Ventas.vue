@@ -53,7 +53,7 @@
           </div>
           <div class="sale-card-footer">
             <span class="sale-total">Total: ${{ formatearPrecio(venta.totalVenta) }}</span>
-            <button class="btn-delete" @click="manejarEliminacion(venta.id)">🗑️ Eliminar</button>
+
           </div>
         </div>
       </div>
@@ -70,18 +70,18 @@ export default {
   data() {
     return {
       ventas: [],
-      reporte: null, // <--- Traducido
+      reporte: null,
       loading: true,
     }
   },
   mounted() {
-    this.cargarDatosVentas(); // <--- Traducido
+    this.cargarDatosVentas();
   },
   methods: {
     /**
      * Carga tanto las ventas como el reporte desde la API.
      */
-    async cargarDatosVentas() { // <--- Traducido
+    async cargarDatosVentas() {
       this.loading = true;
       const token = localStorage.getItem('userToken');
       if (!token) return;
@@ -93,7 +93,7 @@ export default {
         ]);
 
         this.ventas = salesRes.data;
-        this.reporte = reportRes.data; // <--- Traducido
+        this.reporte = reportRes.data;
 
       } catch (error) {
         if (error.response?.status !== 401 && error.response?.status !== 403) {
@@ -110,77 +110,23 @@ export default {
     },
 
     /**
-     * Recarga solo el reporte (útil después de eliminar una venta).
+     * Método ELIMINADO
      */
-    async cargarReporte() { // <--- Traducido
-      const token = localStorage.getItem('userToken');
-      if (!token) return;
-      try {
-        const reportRes = await apiClient.get('/ventas/reporte', { headers: { Authorization: `Bearer ${token}` } });
-        this.reporte = reportRes.data; // <--- Traducido
-      } catch (e) {
-        console.error("Error recargando reporte", e);
-      }
-    },
+    // async cargarReporte() { ... }
 
     /**
-     * Maneja la eliminación de una venta con confirmación.
+     * Método ELIMINADO
      */
-    async manejarEliminacion(ventaId) { // <--- Traducido
-      const token = localStorage.getItem('userToken');
-
-      // 1. Confirmación (Modal Clickable)
-      const result = await Swal.fire({
-        title: '¿Eliminar Venta?',
-        text: `¿Estás seguro de que deseas eliminar la factura ID: ${ventaId}? Esta acción no se puede revertir.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6e6e73',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      });
-
-      if (!result.isConfirmed) return;
-
-      // 2. Acción
-      try {
-        await apiClient.delete(`/ventas/${ventaId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        // 3. Éxito
-        this.ventas = this.ventas.filter(v => v.id !== ventaId); // <--- Traducido
-        this.cargarReporte(); // Actualiza el reporte
-
-        Swal.fire({
-          icon: 'success',
-          title: '¡Eliminada!',
-          text: 'La venta ha sido eliminada.',
-          timer: 2000,
-          showConfirmButton: false,
-        });
-
-      } catch (error) {
-        // 4. Error
-        console.error('Error eliminando venta:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo eliminar la venta.',
-          confirmButtonColor: '#0071e3',
-        });
-      }
-    },
+    // async manejarEliminacion(ventaId) { ... }
 
     /**
      * Helpers de formato
      */
-    formatearPrecio(value) { // <--- Traducido
+    formatearPrecio(value) {
       if (!value) return '0.00';
       return Number(value).toFixed(2);
     },
-    formatearFecha(isoString) { // <--- Traducido
+    formatearFecha(isoString) {
       if (!isoString) return 'Fecha inválida';
       const date = new Date(isoString);
       return date.toLocaleDateString('es-VE'); // Formato DD/MM/YYYY
@@ -329,7 +275,7 @@ export default {
 
 .sale-card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* Alinea el total a la derecha */
   align-items: center;
   padding: 15px 20px;
   background: #f9f9f9;
@@ -345,20 +291,8 @@ export default {
   color: #0071e3;
 }
 
-.btn-delete {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #ff3b30;
-  color: white;
-}
-.btn-delete:hover {
-  background: #c82333;
-}
+/* --- Estilos ELIMINADOS --- */
+/* .btn-delete { ... } */
 
 @media (max-width: 768px) {
   .stats-grid {

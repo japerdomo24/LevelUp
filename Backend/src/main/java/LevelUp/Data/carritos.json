@@ -10,6 +10,15 @@
     "serie" : "AirPods Pro (2da gen)",
     "cantidad" : 1,
     "precioUnitario" : 249.0
+  }, {
+    "productoId" : "9ce82474-ad77-4e99-94a7-02773f152002",
+    "serie" : "MacBook Air 13",
+    "cantidad" : 1,
+    "precioUnitario" : 1099.0
   } ],
-  "total" : 1248.99
+  "total" : 2347.99
+}, {
+  "correoUsuario" : "ja@est.ucab.edu.ve",
+  "items" : [ ],
+  "total" : 0.0
 } ]

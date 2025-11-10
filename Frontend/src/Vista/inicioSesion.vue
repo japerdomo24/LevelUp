@@ -6,19 +6,16 @@
         <p>Bienvenido de vuelta a Level Up</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form @submit.prevent="manejarLogin" class="login-form">
         <div class="form-group">
           <label for="email">Correo Electrónico</label>
           <input
             type="email"
             id="email"
-            v-model="loginData.email"
+            v-model="datosLogin.correo"
             placeholder="tu@email.com"
             required
           />
-          <small class="form-hint">
-            💡 Demo: usa "admin@levelup.com" para acceso administrador
-          </small>
         </div>
 
         <div class="form-group">
@@ -26,16 +23,15 @@
           <input
             type="password"
             id="password"
-            v-model="loginData.password"
+            v-model="datosLogin.clave"
             placeholder="••••••••"
             required
           />
-          <small class="form-hint"> 💡 Demo: cualquier contraseña funciona </small>
         </div>
 
         <div class="form-options">
           <label class="checkbox-label">
-            <input type="checkbox" v-model="loginData.remember" />
+            <input type="checkbox" v-model="datosLogin.recordar" />
             <span class="checkmark"></span>
             Recordarme
           </label>
@@ -46,25 +42,12 @@
           <span v-if="loading">Iniciando sesión...</span>
           <span v-else>Iniciar Sesión</span>
         </button>
-
-        <!-- Demo Info -->
-        <div class="demo-info">
-          <h4>🔐 Accesos de Demo:</h4>
-          <div class="demo-accounts">
-            <div class="demo-account">
-              <strong>Administrador:</strong> admin@levelup.com / cualquier contraseña
-            </div>
-            <div class="demo-account">
-              <strong>Usuario Normal:</strong> usuario@levelup.com / cualquier contraseña
-            </div>
-          </div>
-        </div>
       </form>
 
       <div class="login-footer">
         <p>
           ¿No tienes una cuenta?
-          <a href="#" @click.prevent="goToRegister" class="link">Regístrate aquí</a>
+          <a href="#" @click.prevent="irARegistro" class="link">Regístrate aquí</a>
         </p>
       </div>
     </div>
@@ -72,53 +55,62 @@
 </template>
 
 <script>
+import apiClient from '@/api/axiosConfig.js'
+import Swal from 'sweetalert2'
+
 export default {
   name: 'LoginPage',
   data() {
     return {
-      loginData: {
-        email: '',
-        password: '',
-        remember: false,
+      datosLogin: { // <-- Traducido
+        correo: '',
+        clave: '',
+        recordar: false, // <-- Traducido
       },
       loading: false,
     }
   },
+  // --- MÉTODOS TRADUCIDOS ---
   methods: {
-    async handleLogin() {
+    async manejarLogin() { // <-- Traducido
       this.loading = true
+      const apiPayload = {
+        correo: this.datosLogin.correo,
+        clave: this.datosLogin.clave,
+      }
 
       try {
-        // Simular autenticación
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        const response = await apiClient.post(
+          '/usuarios/login',
+          apiPayload
+        )
+        // El éxito (modal) se maneja en App.vue
+        this.$emit('login-success', response.data)
 
-        // Determinar rol basado en el email
-        let userRole = 'user'
-        let userName = 'Usuario'
-
-        if (this.loginData.email.includes('admin')) {
-          userRole = 'admin'
-          userName = 'Administrador'
-        }
-
-        // Crear datos de usuario
-        const userData = {
-          email: this.loginData.email,
-          name: userName,
-          role: userRole,
-        }
-
-        // Emitir evento de login exitoso
-        this.$emit('login-success', userData)
       } catch (error) {
-        console.error('Error en login:', error)
-        alert('Error al iniciar sesión. Verifica tus credenciales.')
+        // Alerta CLICKABLE
+        if (error.response && error.response.status === 401) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Credenciales inválidas',
+            text: 'Verifica tu correo y contraseña.',
+            confirmButtonColor: '#0071e3',
+          })
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al iniciar sesión',
+            text: 'Por favor, intenta de nuevo más tarde.',
+            confirmButtonColor: '#0071e3',
+          })
+        }
+
       } finally {
         this.loading = false
       }
     },
 
-    goToRegister() {
+    irARegistro() { // <-- Traducido
       this.$emit('change-auth-mode', 'register')
     },
   },
@@ -126,6 +118,7 @@ export default {
 </script>
 
 <style scoped>
+/* ... (Todos tus estilos <style scoped> permanecen exactamente igual) ... */
 .login-container {
   display: flex;
   justify-content: center;

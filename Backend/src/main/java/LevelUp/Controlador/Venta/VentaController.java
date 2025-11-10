@@ -34,7 +34,7 @@ public class VentaController {
     ) {}
 
     public VentaController() {
-        this.manejadorVenta = new ManejadorVentaJSON("src/main/java/LevelUp/Data/ventas.json");
+        this.manejadorVenta = new ManejadorVentaJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/ventas.json");
         // Ya no necesita manejador de carrito ni producto
     }
 

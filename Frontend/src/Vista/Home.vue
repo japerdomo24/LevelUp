@@ -1,34 +1,34 @@
 <template>
   <div class="home">
     <div class="home-container">
-      <div class="category-card iphone theme-light" @click="changePage('products', 'iPhone')">
+      <div class="category-card iphone theme-light" @click="cambiarPagina('products', 'iPhone')">
         <div class="category-content">
           <div class="category-title">{{ homeData.iphone.title }}</div>
           <div class="category-description">{{ homeData.iphone.description }}</div>
           <div class="button-group">
-            <button class="btn-buy" @click.stop="buyProduct('iphone')">Comprar</button>
+            <button class="btn-buy" @click.stop="comprarProducto('iphone')">Comprar</button>
             <button class="btn-more">Ver más</button>
           </div>
         </div>
       </div>
 
-      <div class="category-card mac theme-dark" @click="changePage('products', 'Mac')">
+      <div class="category-card mac theme-dark" @click="cambiarPagina('products', 'Mac')">
         <div class="category-content">
           <div class="category-title">{{ homeData.mac.title }}</div>
           <div class="category-description">{{ homeData.mac.description }}</div>
           <div class="button-group">
-            <button class="btn-buy" @click.stop="buyProduct('mac')">Comprar</button>
+            <button class="btn-buy" @click.stop="comprarProducto('mac')">Comprar</button>
             <button class="btn-more">Ver más</button>
           </div>
         </div>
       </div>
 
-      <div class="category-card ipad theme-light" @click="changePage('products', 'iPad')">
+      <div class="category-card ipad theme-light" @click="cambiarPagina('products', 'iPad')">
         <div class="category-content">
           <div class="category-title">{{ homeData.ipad.title }}</div>
           <div class="category-description">{{ homeData.ipad.description }}</div>
           <div class="button-group">
-            <button class="btn-buy" @click.stop="buyProduct('ipad')">Comprar</button>
+            <button class="btn-buy" @click.stop="comprarProducto('ipad')">Comprar</button>
             <button class="btn-more">Ver más</button>
           </div>
         </div>
@@ -36,21 +36,20 @@
 
       <div
         class="category-card accesorios theme-dark"
-        @click="changePage('products', 'Accesorios')"
+        @click="cambiarPagina('products', 'Accesorios')"
       >
         <div class="category-content">
           <div class="category-title">{{ homeData.accesorios.title }}</div>
           <div class="category-description">{{ homeData.accesorios.description }}</div>
           <div class="button-group">
-            <button class="btn-buy" @click.stop="buyProduct('accesorios')">Comprar</button>
+            <button class="btn-buy" @click.stop="comprarProducto('accesorios')">Comprar</button>
             <button class="btn-more">Ver más</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Botón de edición para administradores -->
-    <button v-if="user?.role === 'admin'" class="edit-home-btn" @click="$emit('edit-home')">
+    <button v-if="user?.rol === 'admin'" class="edit-home-btn" @click="$emit('edit-home')">
       ✏️ Editar Página
     </button>
   </div>
@@ -89,16 +88,43 @@ export default {
     }
   },
   mounted() {
-    this.loadHomeData()
+    this.cargarDatosHome()
   },
   methods: {
-    changePage(page, category) {
+    cambiarPagina(page, category) {
       this.$emit('change-page', page, category)
     },
-    buyProduct(product) {
-      console.log('Comprando:', product)
+
+    // --- ¡MÉTODO ACTUALIZADO! ---
+    comprarProducto(claveProducto) {
+      let categoria = '';
+
+      // Mapea la clave simple (ej: 'iphone') a la categoría real de la API (ej: 'iPhone')
+      switch (claveProducto) {
+        case 'iphone':
+          categoria = 'iPhone';
+          break;
+        case 'mac':
+          categoria = 'Mac';
+          break;
+        case 'ipad':
+          categoria = 'iPad';
+          break;
+        case 'accesorios':
+          categoria = 'Accesorios';
+          break;
+      }
+
+      if (categoria) {
+        // Llama al mismo método que "Ver más"
+        this.cambiarPagina('products', categoria);
+      } else {
+        console.warn('Clave de producto desconocida:', claveProducto);
+      }
     },
-    loadHomeData() {
+    // --- FIN DE LA ACTUALIZACIÓN ---
+
+    cargarDatosHome() {
       const savedData = localStorage.getItem('homeData')
       if (savedData) {
         this.homeData = JSON.parse(savedData)

@@ -1,7 +1,6 @@
 package LevelUp.Controlador.Usuario;
 
 import LevelUp.Modelo.Usuario.Usuario;
-// import LevelUp.Service.JwtService; <-- CAMBIADO
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,27 +15,37 @@ import java.util.stream.Collectors;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    // Instancia del manejador
     ManejadorUsuarioJSON manejador;
 
     @Autowired
     private JwtService jwtService; 
 
-    // Constructor para inicializar el manejador
     public UsuarioController() {
-         // Asegúrate que esta ruta es correcta para tu proyecto
-        this.manejador = new ManejadorUsuarioJSON("src/main/java/LevelUp/Data/usuarios.json");
+        this.manejador = new ManejadorUsuarioJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/usuarios.json");
     }
 
-    // --- DTOs (Data Transfer Objects) ---
-    record UsuarioResponseDTO(String correo, String rol) {}
-    record UsuarioRegistroDTO(String correo, String clavePlana, String rol) {}
+    // --- DTOs (Data Transfer Objects) COMPLETOS ---
+    
+    /** DTO de respuesta (datos públicos) */
+    record UsuarioResponseDTO(String correo, String rol, 
+                              String nombre, String apellido, String numero, String direccion) {}
+
+    /** DTO para registrar un nuevo usuario */
+    record UsuarioRegistroDTO(String correo, String clavePlana, String rol, 
+                              String nombre, String apellido, String numero, String direccion) {}
+
+    /** DTO para InicioSesion (sin cambios) */
     record LoginDTO(String correo, String clave) {}
-    record UsuarioActualizarDTO(String rol, String clavePlana) {}
+    
+    /** DTO de respuesta de InicioSesion (definición sin cambios, pero uso actualizado) */
     record LoginResponseDTO(String token, UsuarioResponseDTO usuario) {}
 
+    /** ¡NUEVO DTO! Para actualizar un usuario (todos los campos opcionales) */
+    record UsuarioActualizarDTO(String rol, String clavePlana, 
+                                String nombre, String apellido, String numero, String direccion) {}
 
-    // --- Endpoints PÚBLICOS (Permitidos por SecurityConfig) ---
+
+    // --- Endpoints PÚBLICOS (Crear y Consultar) ---
     
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO) {
@@ -48,76 +57,94 @@ public class UsuarioController {
         Usuario usuario = usuarioOpt.get();
 
         if (usuario.verificarClave(loginDTO.clave())) {
-            // Clave correcta: Generar token
             String token = jwtService.generarToken(usuario);
-            UsuarioResponseDTO usuarioDTO = new UsuarioResponseDTO(usuario.getCorreo(), usuario.getRol());
+            
+            UsuarioResponseDTO usuarioDTO = new UsuarioResponseDTO(
+                    usuario.getCorreo(), usuario.getRol(),
+                    usuario.getNombre(), usuario.getApellido(),
+                    usuario.getNumero(), usuario.getDireccion()
+            );
             LoginResponseDTO respuestaLogin = new LoginResponseDTO(token, usuarioDTO);
             return ResponseEntity.ok(respuestaLogin);
+            
         } else {
-            // Clave incorrecta
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> crearUsuario(@RequestBody UsuarioRegistroDTO registroDTO) {
+    public ResponseEntity<UsuarioResponseDTO> crearUsuario(@RequestBody UsuarioRegistroDTO dto) {
         List<Usuario> usuarios = manejador.leerUsuarios();
 
         boolean yaExiste = usuarios.stream()
-                .anyMatch(u -> u.getCorreo().equalsIgnoreCase(registroDTO.correo()));
+                .anyMatch(u -> u.getCorreo().equalsIgnoreCase(dto.correo()));
         
         if (yaExiste) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // 409
+            return ResponseEntity.status(HttpStatus.CONFLICT).build(); 
         }
 
         Usuario nuevoUsuario = new Usuario(
-                registroDTO.correo(), 
-                registroDTO.clavePlana(), 
-                registroDTO.rol()
+                dto.correo(), dto.clavePlana(), dto.rol(),
+                dto.nombre(), dto.apellido(), dto.numero(), dto.direccion()
         );
 
         usuarios.add(nuevoUsuario);
         manejador.guardarUsuarios(usuarios);
 
         UsuarioResponseDTO responseDTO = new UsuarioResponseDTO(
-                nuevoUsuario.getCorreo(), 
-                nuevoUsuario.getRol()
+                nuevoUsuario.getCorreo(), nuevoUsuario.getRol(),
+                nuevoUsuario.getNombre(), nuevoUsuario.getApellido(),
+                nuevoUsuario.getNumero(), nuevoUsuario.getDireccion()
         );
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // 201
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); 
     }
 
-    // --- Endpoints PROTEGIDOS (Requieren Token) ---
+    // --- Endpoints PROTEGIDOS (Consultar, Actualizar, Eliminar) ---
     
     @GetMapping
     public List<UsuarioResponseDTO> getUsuarios(){
         List<Usuario> usuarios = manejador.leerUsuarios();
-        // Devuelve la lista sin las claves
+        
         return usuarios.stream()
-                .map(u -> new UsuarioResponseDTO(u.getCorreo(), u.getRol()))
+                .map(u -> new UsuarioResponseDTO(
+                        u.getCorreo(), u.getRol(), u.getNombre(),
+                        u.getApellido(), u.getNumero(), u.getDireccion()
+                ))
                 .collect(Collectors.toList());
     }
     
     @GetMapping("/{correo}")
     public ResponseEntity<UsuarioResponseDTO> getUsuarioPorCorreo(@PathVariable String correo) {
+        
         return encontrarUsuarioPorCorreo(correo)
                 .map(usuario -> ResponseEntity.ok(
-                        new UsuarioResponseDTO(usuario.getCorreo(), usuario.getRol()))
-                )
-                .orElse(ResponseEntity.notFound().build()); // 404
+                        new UsuarioResponseDTO(
+                            usuario.getCorreo(), usuario.getRol(), usuario.getNombre(),
+                            usuario.getApellido(), usuario.getNumero(), usuario.getDireccion()
+                        )
+                ))
+                .orElse(ResponseEntity.notFound().build()); 
     }
 
+    
+    // --- ¡MÉTODOS RESTAURADOS! ---
+
+    /**
+     * [PUT /usuarios/{correo}] - ACTUALIZAR un usuario.
+     * REGLAS:
+     * 1. Un Admin puede editar a CUALQUIERA (rol, clave, perfil).
+     * 2. Un User solo puede editarse a SÍ MISMO (clave, perfil, PERO NO ROL).
+     */
     @PutMapping("/{correo}")
     public ResponseEntity<UsuarioResponseDTO> actualizarUsuario(
             @PathVariable String correo,
-            @RequestBody UsuarioActualizarDTO datosActualizar,
+            @RequestBody UsuarioActualizarDTO dto,
             Authentication authentication) { 
 
-        // 1. Identidad del usuario que hace la petición (del token)
         String correoAutenticado = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_admin"));
 
-        // 2. Usuario que se va a modificar (de la URL)
         List<Usuario> usuarios = manejador.leerUsuarios();
         Optional<Usuario> usuarioOpt = usuarios.stream()
                 .filter(u -> u.getCorreo().equalsIgnoreCase(correo))
@@ -128,53 +155,67 @@ public class UsuarioController {
         }
         Usuario usuarioAEditar = usuarioOpt.get();
 
-        // 3. Aplicar Reglas de Autorización
+        // --- Aplicar Reglas de Autorización ---
         if (esAdmin) {
-            // Admin puede cambiar rol y clave de CUALQUIERA
-            if (datosActualizar.rol() != null) {
-                usuarioAEditar.setRol(datosActualizar.rol());
-            }
-            if (datosActualizar.clavePlana() != null && !datosActualizar.clavePlana().isEmpty()) {
-                usuarioAEditar.setClavePlana(datosActualizar.clavePlana());
-            }
+            // El Admin puede cambiar todo
+            if (dto.rol() != null) usuarioAEditar.setRol(dto.rol());
+            if (dto.clavePlana() != null && !dto.clavePlana().isEmpty()) usuarioAEditar.setClavePlana(dto.clavePlana());
+            if (dto.nombre() != null) usuarioAEditar.setNombre(dto.nombre());
+            if (dto.apellido() != null) usuarioAEditar.setApellido(dto.apellido());
+            if (dto.numero() != null) usuarioAEditar.setNumero(dto.numero());
+            if (dto.direccion() != null) usuarioAEditar.setDireccion(dto.direccion());
+
         } else if (correoAutenticado.equalsIgnoreCase(correo)) {
-            // User solo puede editarse a SÍ MISMO
-            if (datosActualizar.rol() != null && !datosActualizar.rol().equals(usuarioAEditar.getRol())) {
-                // No puede cambiar su propio rol
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+            // El User solo puede editarse a SÍ MISMO
+            
+            // No puede cambiar su propio rol
+            if (dto.rol() != null && !dto.rol().equals(usuarioAEditar.getRol())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Prohibido
             }
-            if (datosActualizar.clavePlana() != null && !datosActualizar.clavePlana().isEmpty()) {
-                // Sí puede cambiar su clave
-                usuarioAEditar.setClavePlana(datosActualizar.clavePlana());
-            }
+            // Sí puede cambiar su clave y perfil
+            if (dto.clavePlana() != null && !dto.clavePlana().isEmpty()) usuarioAEditar.setClavePlana(dto.clavePlana());
+            if (dto.nombre() != null) usuarioAEditar.setNombre(dto.nombre());
+            if (dto.apellido() != null) usuarioAEditar.setApellido(dto.apellido());
+            if (dto.numero() != null) usuarioAEditar.setNumero(dto.numero());
+            if (dto.direccion() != null) usuarioAEditar.setDireccion(dto.direccion());
         } else {
-            // Un User intentando editar a OTRO
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+            // Un User intentando editar a OTRO usuario
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Prohibido
         }
 
-        // 4. Guardar y responder
         manejador.guardarUsuarios(usuarios);
-        UsuarioResponseDTO responseDTO = new UsuarioResponseDTO(usuarioAEditar.getCorreo(), usuarioAEditar.getRol());
+
+        // Devolver el usuario actualizado
+        UsuarioResponseDTO responseDTO = new UsuarioResponseDTO(
+                usuarioAEditar.getCorreo(), usuarioAEditar.getRol(),
+                usuarioAEditar.getNombre(), usuarioAEditar.getApellido(),
+                usuarioAEditar.getNumero(), usuarioAEditar.getDireccion()
+        );
         return ResponseEntity.ok(responseDTO);
     }
 
+
+    /**
+     * [DELETE /usuarios/{correo}] - ELIMINAR un usuario.
+     * REGLAS:
+     * 1. Un Admin puede eliminar a CUALQUIERA.
+     * 2. Un User solo puede eliminarse a SÍ MISMO.
+     */
     @DeleteMapping("/{correo}")
     public ResponseEntity<Void> eliminarUsuario(
             @PathVariable String correo,
             Authentication authentication) { 
 
-        // 1. Identidad del usuario que hace la petición (del token)
         String correoAutenticado = authentication.getName();
         boolean esAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_admin"));
 
-        // 2. Aplicar Reglas de Autorización
+        // --- Aplicar Reglas de Autorización ---
         if (!esAdmin && !correoAutenticado.equalsIgnoreCase(correo)) {
             // No eres admin Y no estás intentando borrarte a ti mismo
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Prohibido
         }
         
-        // 3. Proceder con la eliminación
         List<Usuario> usuarios = manejador.leerUsuarios();
         boolean eliminado = usuarios.removeIf(
                 u -> u.getCorreo().equalsIgnoreCase(correo)
@@ -187,7 +228,7 @@ public class UsuarioController {
         manejador.guardarUsuarios(usuarios);
         return ResponseEntity.noContent().build(); // 204
     }
-
+    
     
     // --- Método de Ayuda (Helper) ---
     private Optional<Usuario> encontrarUsuarioPorCorreo(String correo) {

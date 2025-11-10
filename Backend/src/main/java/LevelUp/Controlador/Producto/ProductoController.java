@@ -16,7 +16,7 @@ public class ProductoController {
 
     public ProductoController() {
         // Asegúrate que esta ruta es correcta y existe la carpeta Data
-        this.manejador = new ManejadorProductoJSON("src/main/java/LevelUp/Data/productos.json");
+        this.manejador = new ManejadorProductoJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/productos.json");
     }
 
     // --- DTOs (Data Transfer Objects) para Productos ---

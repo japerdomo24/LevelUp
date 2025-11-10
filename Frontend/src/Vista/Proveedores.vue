@@ -2,22 +2,21 @@
   <div class="suppliers">
     <div class="suppliers-header">
       <h1>Gestión de Proveedores</h1>
-      <button class="btn-create-supplier" @click="showCreateForm = true">➕ Nuevo Proveedor</button>
+      <button class="btn-create-supplier" @click="mostrarFormularioCrear = true">➕ Nuevo Proveedor</button>
     </div>
 
-    <!-- Formulario de crear proveedor -->
-    <div v-if="showCreateForm" class="supplier-form-overlay">
+    <div v-if="mostrarFormularioCrear" class="supplier-form-overlay">
       <div class="supplier-form">
         <h3>Registro de Nuevo Proveedor</h3>
 
-        <form @submit.prevent="createSupplier">
+        <form @submit.prevent="crearProveedor">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Nombre del Proveedor *</label>
               <input
                 type="text"
                 id="name"
-                v-model="newSupplier.name"
+                v-model="nuevoProveedor.nombre"
                 required
                 placeholder="Ej: Apple Inc."
               />
@@ -28,7 +27,7 @@
               <input
                 type="text"
                 id="rif"
-                v-model="newSupplier.rif"
+                v-model="nuevoProveedor.rif"
                 required
                 placeholder="Ej: J-123456789"
               />
@@ -41,7 +40,7 @@
               <input
                 type="tel"
                 id="phone"
-                v-model="newSupplier.phone"
+                v-model="nuevoProveedor.telefono"
                 required
                 placeholder="Ej: +58 412-1234567"
               />
@@ -52,7 +51,7 @@
               <input
                 type="email"
                 id="email"
-                v-model="newSupplier.email"
+                v-model="nuevoProveedor.correo"
                 required
                 placeholder="Ej: contacto@proveedor.com"
               />
@@ -63,7 +62,7 @@
             <label for="address">Dirección *</label>
             <textarea
               id="address"
-              v-model="newSupplier.address"
+              v-model="nuevoProveedor.direccion"
               required
               placeholder="Dirección completa del proveedor"
               rows="3"
@@ -71,18 +70,17 @@
           </div>
 
           <div class="form-group">
-            <label for="products">Productos que Suministra *</label>
+            <label for="facturas">Facturas / Órdenes (separadas por coma)</label>
             <input
               type="text"
-              id="products"
-              v-model="newSupplier.products"
-              required
-              placeholder="Ej: iPhone, MacBook, iPad"
+              id="facturas"
+              v-model="facturasInput"
+              placeholder="Ej: F-001, F-002, ORD-003"
             />
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-cancel" @click="cancelCreate">Cancelar</button>
+            <button type="button" class="btn-cancel" @click="cancelarCreacion">Cancelar</button>
             <button type="submit" class="btn-save" :disabled="loading">
               {{ loading ? 'Registrando...' : 'Registrar Proveedor' }}
             </button>
@@ -91,63 +89,65 @@
       </div>
     </div>
 
-    <!-- Lista de proveedores -->
     <div class="suppliers-list">
-      <div v-if="suppliers.length === 0" class="empty-state">
+      <div v-if="loading && proveedores.length === 0" class="empty-state">
+        <p>Cargando proveedores...</p>
+      </div>
+
+      <div v-else-if="proveedores.length === 0" class="empty-state">
         <p>No hay proveedores registrados</p>
-        <button class="btn-create-first" @click="showCreateForm = true">
+        <button class="btn-create-first" @click="mostrarFormularioCrear = true">
           Registrar Primer Proveedor
         </button>
       </div>
 
       <div v-else class="suppliers-grid">
-        <div v-for="supplier in suppliers" :key="supplier.id" class="supplier-card">
+        <div v-for="proveedor in proveedores" :key="proveedor.id" class="supplier-card">
           <div class="supplier-info">
-            <h3>{{ supplier.name }}</h3>
+            <h3>{{ proveedor.nombre }}</h3>
             <div class="supplier-details">
-              <p><strong>RIF:</strong> {{ supplier.rif }}</p>
-              <p><strong>Teléfono:</strong> {{ supplier.phone }}</p>
-              <p><strong>Email:</strong> {{ supplier.email }}</p>
-              <p><strong>Dirección:</strong> {{ supplier.address }}</p>
-              <p><strong>Productos:</strong> {{ supplier.products }}</p>
+              <p><strong>RIF:</strong> {{ proveedor.rif }}</p>
+              <p><strong>Teléfono:</strong> {{ proveedor.telefono }}</p>
+              <p><strong>Email:</strong> {{ proveedor.correo }}</p>
+              <p><strong>Dirección:</strong> {{ proveedor.direccion }}</p>
+              <p><strong>Facturas:</strong> {{ proveedor.facturas.join(', ') || 'N/A' }}</p>
             </div>
           </div>
 
           <div class="supplier-actions">
-            <button class="btn-edit" @click="editSupplier(supplier)">✏️ Editar</button>
-            <button class="btn-delete" @click="deleteSupplier(supplier.id)">🗑️ Eliminar</button>
+            <button class="btn-edit" @click="editarProveedor(proveedor)">✏️ Editar</button>
+            <button class="btn-delete" @click="eliminarProveedor(proveedor.id)">🗑️ Eliminar</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de edición -->
-    <div v-if="showEditForm" class="supplier-form-overlay">
+    <div v-if="mostrarFormularioEditar" class="supplier-form-overlay">
       <div class="supplier-form">
         <h3>Editar Proveedor</h3>
 
-        <form @submit.prevent="updateSupplier">
+        <form @submit.prevent="actualizarProveedor">
           <div class="form-row">
             <div class="form-group">
               <label for="edit-name">Nombre del Proveedor *</label>
-              <input type="text" id="edit-name" v-model="editSupplierData.name" required />
+              <input type="text" id="edit-name" v-model="datosEditarProveedor.nombre" required />
             </div>
 
             <div class="form-group">
               <label for="edit-rif">RIF *</label>
-              <input type="text" id="edit-rif" v-model="editSupplierData.rif" required />
+              <input type="text" id="edit-rif" v-model="datosEditarProveedor.rif" required />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="edit-phone">Teléfono *</label>
-              <input type="tel" id="edit-phone" v-model="editSupplierData.phone" required />
+              <input type="tel" id="edit-phone" v-model="datosEditarProveedor.telefono" required />
             </div>
 
             <div class="form-group">
               <label for="edit-email">Correo Electrónico *</label>
-              <input type="email" id="edit-email" v-model="editSupplierData.email" required />
+              <input type="email" id="edit-email" v-model="datosEditarProveedor.correo" required />
             </div>
           </div>
 
@@ -155,19 +155,19 @@
             <label for="edit-address">Dirección *</label>
             <textarea
               id="edit-address"
-              v-model="editSupplierData.address"
+              v-model="datosEditarProveedor.direccion"
               required
               rows="3"
             ></textarea>
           </div>
 
           <div class="form-group">
-            <label for="edit-products">Productos que Suministra *</label>
-            <input type="text" id="edit-products" v-model="editSupplierData.products" required />
+            <label for="edit-facturas">Facturas / Órdenes (separadas por coma)</label>
+            <input type="text" id="edit-facturas" v-model="facturasInput" />
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-cancel" @click="cancelEdit">Cancelar</button>
+            <button type="button" class="btn-cancel" @click="cancelarEdicion">Cancelar</button>
             <button type="submit" class="btn-save" :disabled="loading">
               {{ loading ? 'Actualizando...' : 'Actualizar Proveedor' }}
             </button>
@@ -179,172 +179,266 @@
 </template>
 
 <script>
+import apiClient from '@/api/axiosConfig.js'
+import Swal from 'sweetalert2'
+
 export default {
   name: 'SuppliersPage',
   data() {
     return {
-      suppliers: [],
-      showCreateForm: false,
-      showEditForm: false,
+      proveedores: [],
+      mostrarFormularioCrear: false,
+      mostrarFormularioEditar: false,
       loading: false,
-      newSupplier: {
-        name: '',
+      facturasInput: '',
+      nuevoProveedor: {
         rif: '',
-        phone: '',
-        email: '',
-        address: '',
-        products: '',
+        nombre: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        facturas: [],
       },
-      editSupplierData: {
+      datosEditarProveedor: {
         id: null,
-        name: '',
         rif: '',
-        phone: '',
-        email: '',
-        address: '',
-        products: '',
+        nombre: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        facturas: [],
       },
     }
   },
   mounted() {
-    this.loadSuppliers()
+    this.cargarProveedores()
   },
   methods: {
-    loadSuppliers() {
-      const savedSuppliers = localStorage.getItem('suppliers')
-      if (savedSuppliers) {
-        this.suppliers = JSON.parse(savedSuppliers)
+    async cargarProveedores() {
+      this.loading = true;
+      const token = localStorage.getItem('userToken');
+      if (!token) return;
+
+      try {
+        const response = await apiClient.get('/proveedores', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.proveedores = response.data;
+      } catch (error) {
+        if (error.response?.status !== 401 && error.response?.status !== 403) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al cargar proveedores',
+            text: error.message,
+            confirmButtonColor: '#0071e3',
+          });
+        }
+      } finally {
+        this.loading = false;
       }
     },
 
-    saveSuppliers() {
-      localStorage.setItem('suppliers', JSON.stringify(this.suppliers))
-    },
-
-    async createSupplier() {
-      // Validación básica
-      if (!this.validateSupplier(this.newSupplier)) {
-        alert('Por favor, complete todos los campos correctamente.')
+    async crearProveedor() {
+      if (!this.validarProveedor(this.nuevoProveedor)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor, complete todos los campos requeridos (*).',
+          confirmButtonColor: '#0071e3'
+        });
         return
       }
 
       this.loading = true
+      const token = localStorage.getItem('userToken');
 
       try {
-        // Simular proceso de registro
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const payload = {
+          ...this.nuevoProveedor,
+          facturas: this.facturasInput.split(',').map(s => s.trim()).filter(Boolean)
+        };
 
-        // Verificar si ya existe el proveedor
-        const exists = this.suppliers.some(
-          (s) => s.rif === this.newSupplier.rif || s.email === this.newSupplier.email,
-        )
+        const response = await apiClient.post('/proveedores', payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-        if (exists) {
-          alert('Este proveedor ya existe en el sistema.')
-          return
-        }
+        this.proveedores.push(response.data);
+        this.cancelarCreacion();
 
-        // Crear nuevo proveedor
-        const newSupplier = {
-          id: Date.now(),
-          ...this.newSupplier,
-          createdAt: new Date().toISOString(),
-        }
+        Swal.fire({
+          icon: 'success',
+          title: '¡Registrado!',
+          text: 'Proveedor registrado exitosamente.',
+          timer: 2000,
+          showConfirmButton: false,
+        });
 
-        this.suppliers.push(newSupplier)
-        this.saveSuppliers()
-
-        // Limpiar formulario
-        this.resetNewSupplier()
-        this.showCreateForm = false
-
-        alert('Proveedor registrado exitosamente!')
       } catch (error) {
         console.error('Error registrando proveedor:', error)
-        alert('Error al registrar el proveedor.')
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo registrar el proveedor.',
+          confirmButtonColor: '#0071e3',
+        });
       } finally {
         this.loading = false
       }
     },
 
-    editSupplier(supplier) {
-      this.editSupplierData = { ...supplier }
-      this.showEditForm = true
+    editarProveedor(proveedor) {
+      this.datosEditarProveedor = { ...proveedor };
+      this.facturasInput = proveedor.facturas.join(', ');
+      this.mostrarFormularioEditar = true
     },
 
-    async updateSupplier() {
-      if (!this.validateSupplier(this.editSupplierData)) {
-        alert('Por favor, complete todos los campos correctamente.')
+    async actualizarProveedor() {
+      if (!this.validarProveedor(this.datosEditarProveedor)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor, complete todos los campos requeridos (*).',
+          confirmButtonColor: '#0071e3'
+        });
         return
       }
 
+      const result = await Swal.fire({
+        title: '¿Actualizar proveedor?',
+        text: `Se guardarán los cambios para ${this.datosEditarProveedor.nombre}.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0071e3',
+        cancelButtonColor: '#6e6e73',
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar'
+      })
+
+      if (!result.isConfirmed) return;
+
       this.loading = true
+      const token = localStorage.getItem('userToken');
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const payload = {
+          ...this.datosEditarProveedor,
+          facturas: this.facturasInput.split(',').map(s => s.trim()).filter(Boolean)
+        };
 
-        const index = this.suppliers.findIndex((s) => s.id === this.editSupplierData.id)
+        await apiClient.put(`/proveedores/${this.datosEditarProveedor.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const index = this.proveedores.findIndex((s) => s.id === this.datosEditarProveedor.id)
         if (index !== -1) {
-          this.suppliers[index] = { ...this.editSupplierData }
-          this.saveSuppliers()
-
-          this.showEditForm = false
-          alert('Proveedor actualizado exitosamente!')
+          this.proveedores[index] = { ...payload };
         }
+
+        this.cancelarEdicion();
+        Swal.fire({
+          icon: 'success',
+          title: '¡Actualizado!',
+          text: 'Proveedor actualizado exitosamente.',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
       } catch (error) {
         console.error('Error actualizando proveedor:', error)
-        alert('Error al actualizar el proveedor.')
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo actualizar el proveedor.',
+          confirmButtonColor: '#0071e3',
+        });
       } finally {
         this.loading = false
       }
     },
 
-    deleteSupplier(supplierId) {
-      if (confirm('¿Está seguro de que desea eliminar este proveedor?')) {
-        this.suppliers = this.suppliers.filter((s) => s.id !== supplierId)
-        this.saveSuppliers()
-        alert('Proveedor eliminado exitosamente!')
+    async eliminarProveedor(proveedorId) {
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6e6e73',
+        confirmButtonText: 'Sí, eliminarlo',
+        cancelButtonText: 'Cancelar'
+      })
+
+      if (result.isConfirmed) {
+        this.loading = true;
+        const token = localStorage.getItem('userToken');
+
+        try {
+          await apiClient.delete(`/proveedores/${proveedorId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          this.proveedores = this.proveedores.filter((s) => s.id !== proveedorId)
+          Swal.fire({
+            icon: 'success',
+            title: '¡Eliminado!',
+            text: 'El proveedor ha sido eliminado.',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+
+        } catch (error) {
+          console.error('Error eliminando proveedor:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo eliminar el proveedor.',
+            confirmButtonColor: '#0071e3',
+          });
+        } finally {
+          this.loading = false;
+        }
       }
     },
 
-    validateSupplier(supplier) {
+    validarProveedor(proveedor) {
       return (
-        supplier.name &&
-        supplier.rif &&
-        supplier.phone &&
-        supplier.email &&
-        supplier.address &&
-        supplier.products
+        proveedor.nombre &&
+        proveedor.rif &&
+        proveedor.telefono &&
+        proveedor.correo &&
+        proveedor.direccion
       )
     },
 
-    resetNewSupplier() {
-      this.newSupplier = {
-        name: '',
+    limpiarFormularioNuevo() {
+      this.nuevoProveedor = {
         rif: '',
-        phone: '',
-        email: '',
-        address: '',
-        products: '',
+        nombre: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        facturas: [],
       }
+      this.facturasInput = '';
     },
 
-    cancelCreate() {
-      this.showCreateForm = false
-      this.resetNewSupplier()
+    cancelarCreacion() {
+      this.mostrarFormularioCrear = false
+      this.limpiarFormularioNuevo()
     },
 
-    cancelEdit() {
-      this.showEditForm = false
-      this.editSupplierData = {
+    cancelarEdicion() {
+      this.mostrarFormularioEditar = false
+      this.datosEditarProveedor = {
         id: null,
-        name: '',
         rif: '',
-        phone: '',
-        email: '',
-        address: '',
-        products: '',
+        nombre: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        facturas: [],
       }
+      this.facturasInput = '';
     },
   },
 }
@@ -552,6 +646,9 @@ export default {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e5e7;
   transition: all 0.3s ease;
+  display: flex; /* Añadido */
+  flex-direction: column; /* Añadido */
+  justify-content: space-between; /* Añadido */
 }
 
 .supplier-card:hover {

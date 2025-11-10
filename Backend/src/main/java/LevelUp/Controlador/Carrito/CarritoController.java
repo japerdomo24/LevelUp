@@ -34,9 +34,9 @@ public class CarritoController {
 
     public CarritoController() {
         // Asegúrate que las rutas a tus archivos de datos son correctas
-        this.manejadorCarrito = new ManejadorCarritoJSON("src/main/java/LevelUp/Data/carritos.json");
-        this.manejadorProducto = new ManejadorProductoJSON("src/main/java/LevelUp/Data/productos.json");
-        this.manejadorVenta = new ManejadorVentaJSON("src/main/java/LevelUp/Data/ventas.json"); // <-- NUEVO
+        this.manejadorCarrito = new ManejadorCarritoJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/carritos.json");
+        this.manejadorProducto = new ManejadorProductoJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/productos.json");
+        this.manejadorVenta = new ManejadorVentaJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/ventas.json"); // <-- NUEVO
     }
 
     /**

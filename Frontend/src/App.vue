@@ -1,126 +1,131 @@
 <template>
   <div id="app">
-    <!-- Barra de navegación -->
     <Navbar
       :currentPage="currentPage"
       :user="user"
-      @change-page="changePage"
-      @open-login="changeAuthMode('login')"
-      @open-profile="openProfile"
-      @logout="logout"
+      @change-page="cambiarPagina"
+      @open-login="cambiarModoAutenticacion('login')"
+      @open-profile="abrirPerfil"
+      @logout="cerrarSesion"
     />
 
-    <!-- Contenido principal -->
     <main class="main-content">
       <div class="container">
-        <!-- Página de inicio -->
         <Home
           v-if="currentPage === 'home'"
-          @change-page="changePage"
+          @change-page="cambiarPagina"
           :user="user"
-          @edit-home="changePage('edit-home')"
+          @edit-home="cambiarPagina('edit-home')"
         />
 
-        <!-- Página de productos -->
         <Products
           v-else-if="currentPage === 'products'"
           :category="currentCategory"
           :user="user"
-          @view-product="viewProduct"
-          @change-page="changePage"
-          @create-product="changePage('create-product')"
+          @view-product="verProducto"
+          @change-page="cambiarPagina"
+          @create-product="cambiarPagina('create-product')"
         />
 
-        <!-- Página de detalles del producto -->
         <ProductDetail
           v-else-if="currentPage === 'product-detail'"
           :product="selectedProduct"
-          @add-to-cart="addToCart"
-          @change-page="changePage"
+          :user="user"
+          @add-to-cart="agregarAlCarrito"
+          @change-page="cambiarPagina"
+          @edit-product="manejarEditarProducto"
         />
 
-        <!-- Página del carrito -->
-        <Cart v-else-if="currentPage === 'cart'" :cartItems="cartItems" @change-page="changePage" />
+        <Cart
+          v-else-if="currentPage === 'cart' && user?.rol === 'user'"
+          @change-page="cambiarPagina"
+        />
 
-        <!-- Página de proveedores (solo admin) -->
         <Suppliers
-          v-else-if="currentPage === 'suppliers' && user?.role === 'admin'"
-          @change-page="changePage"
+          v-else-if="currentPage === 'suppliers' && user?.rol === 'admin'"
+          @change-page="cambiarPagina"
         />
 
-        <!-- Página de ventas (solo admin) -->
         <Sales
-          v-else-if="currentPage === 'sales' && user?.role === 'admin'"
-          @change-page="changePage"
+          v-else-if="currentPage === 'sales' && user?.rol === 'admin'"
+          @change-page="cambiarPagina"
         />
 
-        <!-- Página de crear producto (solo admin) -->
         <CreateProduct
-          v-else-if="currentPage === 'create-product' && user?.role === 'admin'"
+          v-else-if="currentPage === 'create-product' && user?.rol === 'admin'"
           :category="currentCategory"
-          @change-page="changePage"
-          @product-created="handleProductCreated"
+          @change-page="cambiarPagina"
+          @product-created="manejarProductoCreado"
         />
 
-        <!-- Página de editar home (solo admin) -->
         <EditHome
-          v-else-if="currentPage === 'edit-home' && user?.role === 'admin'"
-          @change-page="changePage"
-          @home-updated="handleHomeUpdated"
+          v-else-if="currentPage === 'edit-home' && user?.rol === 'admin'"
+          @change-page="cambiarPagina"
+          @home-updated="manejarHomeActualizado"
         />
 
-        <!-- Página de autenticación -->
         <div v-else-if="currentPage === 'auth'">
           <Login
             v-if="authMode === 'login'"
-            @login-success="handleLoginSuccess"
-            @change-auth-mode="changeAuthMode"
+            @login-success="manejarLoginExitoso"
+            @change-auth-mode="cambiarModoAutenticacion"
           />
           <Register
             v-else
-            @register-success="handleRegisterSuccess"
-            @change-auth-mode="changeAuthMode"
+            @register-success="manejarRegistroExitoso"
+            @change-auth-mode="cambiarModoAutenticacion"
           />
         </div>
 
-        <!-- Página de perfil (SOLO para usuarios logeados) -->
         <Profile
           v-else-if="currentPage === 'profile' && user"
           :user="user"
-          @profile-updated="handleProfileUpdate"
-          @change-page="changePage"
-        />
+          @profile-updated="manejarActualizacionPerfil"
+          @change-page="cambiarPagina"
+          @logout="cerrarSesion" />
 
-        <!-- Redirección si intenta acceder a secciones admin sin permisos -->
-        <div v-else-if="requiresAdmin && (!user || user.role !== 'admin')" class="admin-required">
+        <div v-else-if="requiresAdmin || (currentPage === 'cart' && (!user || user.rol !== 'user'))" class="admin-required">
           <div class="admin-message">
             <h2>Acceso Denegado</h2>
-            <p>Se requieren permisos de administrador para acceder a esta sección</p>
-            <button class="btn-home" @click="changePage('home')">Volver al Inicio</button>
+            <p>No tienes permisos para acceder a esta sección.</p>
+            <button class="btn-home" @click="cambiarPagina('home')">Volver al Inicio</button>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Pie de página -->
     <MyFooter />
   </div>
 </template>
 
 <script>
-import Navbar from './components/Navbar.vue'
-import MyFooter from './components/MyFooter.vue'
-import Home from './components/Home.vue'
-import Products from './components/Products.vue'
-import ProductDetail from './components/ProductDetail.vue'
-import Cart from './components/Cart.vue'
-import Login from './components/Login.vue'
-import Register from './components/Register.vue'
-import Profile from './components/Profile.vue'
-import Suppliers from './components/Suppliers.vue'
-import Sales from './components/Sales.vue'
-import CreateProduct from './components/CreateProduct.vue'
-import EditHome from './components/EditHome.vue'
+// --- Importaciones de Componentes ---
+import Navbar from '@/Componentes/Navbar.vue'
+import MyFooter from '@/Componentes/MyFooter.vue'
+import Home from './Vista/Home.vue'
+import Productos from './Vista/Productos.vue'
+import DetalleProducto from './Vista/DetalleProducto.vue'
+import Carrito from './Vista/Carrito.vue'
+import InicioSesion from './Vista/inicioSesion.vue'
+import Registro from './Vista/Registro.vue'
+import Perfil from './Vista/Perfil.vue'
+import Proveedores from './Vista/Proveedores.vue'
+import Ventas from './Vista/Ventas.vue'
+import CrearProducto from './Vista/CrearProducto.vue'
+import EditHome from './Vista/EditHome.vue'
+
+// --- Importaciones de API ---
+import apiClient from '@/api/axiosConfig'
+import Swal from 'sweetalert2'
+
+// --- Configuración de Toast (SOLO PARA 'ADD-TO-CART') ---
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+})
 
 export default {
   name: 'App',
@@ -128,15 +133,15 @@ export default {
     Navbar,
     MyFooter,
     Home,
-    Products,
-    ProductDetail,
-    Cart,
-    Login,
-    Register,
-    Profile,
-    Suppliers,
-    Sales,
-    CreateProduct,
+    Products: Productos,
+    ProductDetail: DetalleProducto,
+    Cart: Carrito,
+    Login: InicioSesion,
+    Register: Registro,
+    Profile: Perfil,
+    Suppliers: Proveedores,
+    Sales: Ventas,
+    CreateProduct: CrearProducto,
     EditHome,
   },
   data() {
@@ -144,85 +149,208 @@ export default {
       currentPage: 'home',
       currentCategory: '',
       selectedProduct: null,
-      cartItems: [],
       authMode: 'login',
       user: null,
+      token: null,
     }
   },
   computed: {
     requiresAdmin() {
       const adminPages = ['suppliers', 'sales', 'create-product', 'edit-home']
-      return adminPages.includes(this.currentPage)
+      return adminPages.includes(this.currentPage) && (!this.user || this.user.rol !== 'admin')
     },
   },
+  // --- MÉTODOS TRADUCIDOS ---
   methods: {
-    changePage(page, category = '') {
+    cambiarPagina(page, category = '') {
       this.currentPage = page
       this.currentCategory = category
-
       if (page === 'products') {
         this.selectedProduct = null
       }
     },
 
-    viewProduct(product) {
+    verProducto(product) {
       this.selectedProduct = product
       this.currentPage = 'product-detail'
     },
 
-    addToCart(productWithOptions) {
-      this.cartItems.push(productWithOptions)
-      this.changePage('products', this.selectedProduct.category)
+    async agregarAlCarrito(cartItem) {
+      if (!this.token) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Acción Requerida',
+          text: 'Debes iniciar sesión primero.',
+          confirmButtonColor: '#0071e3',
+        });
+        this.cambiarModoAutenticacion('login');
+        return;
+      }
+
+      try {
+        const payload = {
+          productoId: cartItem.id,
+          cantidad: cartItem.quantity
+        };
+
+        await apiClient.post('/carrito', payload, {
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+
+        // --- ¡EL ÚNICO TOAST PERMITIDO! ---
+        Toast.fire({
+          icon: 'success',
+          title: `¡${cartItem.serie} añadido al carrito!`
+        })
+
+        this.cambiarPagina('products', this.selectedProduct.tipo);
+
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          Swal.fire({
+            icon: 'error',
+            title: '¡Stock insuficiente!',
+            confirmButtonColor: '#0071e3',
+          })
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al añadir el producto',
+            confirmButtonColor: '#0071e3',
+          })
+        }
+      }
     },
 
-    changeAuthMode(mode) {
+    cambiarModoAutenticacion(mode) {
       this.authMode = mode
       this.currentPage = 'auth'
     },
 
-    openProfile() {
+    abrirPerfil() {
       if (this.user) {
-        this.changePage('profile')
+        this.cambiarPagina('profile')
       } else {
-        this.changeAuthMode('login')
-        alert('Por favor, inicia sesión para acceder a tu perfil')
+        Swal.fire({
+          icon: 'info',
+          title: 'Inicia sesión para ver tu perfil',
+          confirmButtonColor: '#0071e3',
+        })
+        this.cambiarModoAutenticacion('login')
       }
     },
 
-    handleLoginSuccess(userData) {
-      this.user = userData
+    manejarLoginExitoso(loginData) {
+      this.user = loginData.usuario;
+      this.token = loginData.token;
+
+      localStorage.setItem('userToken', loginData.token);
+      localStorage.setItem('userData', JSON.stringify(loginData.usuario));
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${loginData.token}`;
+
       this.currentPage = 'home'
-      alert(`¡Bienvenido ${userData.name}!`)
+
+      Swal.fire({
+        icon: 'success',
+        title: `¡Bienvenido, ${loginData.usuario.nombre}!`,
+        timer: 2000,
+        showConfirmButton: false,
+      })
     },
 
-    handleRegisterSuccess(userData) {
-      this.user = userData
-      this.currentPage = 'home'
-      alert(`¡Cuenta creada exitosamente! Bienvenido ${userData.name}`)
+    manejarRegistroExitoso() {
+      // No hace nada, Registro.vue maneja la alerta y el cambio
     },
 
-    handleProfileUpdate(updatedUser) {
+    manejarActualizacionPerfil(updatedUser) {
       this.user = updatedUser
+      localStorage.setItem('userData', JSON.stringify(updatedUser));
       this.currentPage = 'home'
-      alert('Perfil actualizado exitosamente!')
+      Swal.fire({
+        icon: 'success',
+        title: 'Perfil actualizado',
+        timer: 2000,
+        showConfirmButton: false,
+      })
     },
 
-    handleProductCreated() {
-      this.changePage('products', this.currentCategory)
-      alert('Producto creado exitosamente!')
+    manejarProductoCreado() {
+      this.cambiarPagina('products', this.currentCategory)
+      Swal.fire({
+        icon: 'success',
+        title: 'Producto creado exitosamente',
+        timer: 2000,
+        showConfirmButton: false,
+      })
     },
 
-    handleHomeUpdated() {
-      this.changePage('home')
-      alert('Página de inicio actualizada exitosamente!')
+    manejarHomeActualizado() {
+      this.cambiarPagina('home')
+      Swal.fire({
+        icon: 'success',
+        title: 'Página de inicio actualizada',
+        timer: 2000,
+        showConfirmButton: false,
+      })
     },
 
-    logout() {
+    manejarEditarProducto(product) {
+      Swal.fire({
+        icon: 'info',
+        title: `Cargando editor para: ${product.serie}`,
+        timer: 2000,
+        showConfirmButton: false,
+      })
+      // (Aquí iría la lógica futura para ir a la página de edición)
+    },
+
+    async cerrarSesion(saltarConfirmacion = false) {
+      if (!saltarConfirmacion) {
+        const result = await Swal.fire({
+          title: '¿Cerrar sesión?',
+          text: "¿Estás seguro de que quieres salir?",
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#0071e3',
+          cancelButtonColor: '#6e6e73',
+          confirmButtonText: 'Sí, cerrar sesión',
+          cancelButtonText: 'Cancelar'
+        })
+        if (!result.isConfirmed) return;
+      }
+
       this.user = null
+      this.token = null
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('userData');
+      delete apiClient.defaults.headers.common['Authorization'];
+
       this.currentPage = 'home'
-      alert('Sesión cerrada exitosamente')
+
+      if (!saltarConfirmacion) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Sesión cerrada',
+          timer: 2000,
+          showConfirmButton: false,
+        })
+      }
     },
+
+    revisarSesionPersistente() {
+      const token = localStorage.getItem('userToken');
+      const userData = localStorage.getItem('userData');
+
+      if (token && userData) {
+        this.token = token;
+        this.user = JSON.parse(userData);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+    }
   },
+  created() {
+    this.revisarSesionPersistente();
+  }
 }
 </script>
 

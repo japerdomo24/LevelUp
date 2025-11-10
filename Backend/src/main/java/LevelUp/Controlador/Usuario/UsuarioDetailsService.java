@@ -18,7 +18,7 @@ public class UsuarioDetailsService implements UserDetailsService {
 
     public UsuarioDetailsService() {
         // Asegúrate que esta ruta es correcta para tu proyecto
-        this.manejador = new ManejadorUsuarioJSON("src/main/java/LevelUp/Data/usuarios.json");
+        this.manejador = new ManejadorUsuarioJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/usuarios.json");
     }
 
     @Override

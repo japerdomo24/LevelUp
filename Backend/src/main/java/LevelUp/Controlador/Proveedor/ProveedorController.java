@@ -16,7 +16,7 @@ public class ProveedorController {
 
     public ProveedorController() {
         // Asegúrate que esta ruta es correcta
-        this.manejador = new ManejadorProveedorJSON("src/main/java/LevelUp/Data/proveedores.json");
+        this.manejador = new ManejadorProveedorJSON("/Users/jose/Desktop/Uni/LevelUp/Backend/src/main/java/LevelUp/Data/proovedores.json");
     }
 
     // --- DTOs (Data Transfer Objects) para Proveedores ---

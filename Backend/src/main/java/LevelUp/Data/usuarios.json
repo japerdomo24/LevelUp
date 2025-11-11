@@ -30,4 +30,12 @@
   "apellido" : "Perez",
   "numero" : "+58422534536",
   "direccion" : "errtgr"
+}, {
+  "correo" : "vmramos.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$Esb/23wN./q8Axd5BXCC5uxdSiJUEKsVTK/cUyIKBxuKpzEbh6A3u",
+  "rol" : "admin",
+  "nombre" : "Victor",
+  "apellido" : "Ramos",
+  "numero" : "04241993112",
+  "direccion" : "La Florida"
 } ]

@@ -80,9 +80,10 @@ public class ProveedorController {
 
     /**
      * [PUT /proveedores/{id}] - Actualizar un proveedor existente.
+* ¡CON VALIDACIONES DE LA HISTORIA DE USUARIO!
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> actualizarProveedor(
+    public ResponseEntity<?> actualizarProveedor( // <-- Cambiado a ResponseEntity<?>
             @PathVariable String id, 
             @RequestBody ProveedorUpdateDTO dto) {
         
@@ -97,13 +98,61 @@ public class ProveedorController {
 
         Proveedor proveedorAActualizar = proveedorOpt.get();
 
-        // Actualizamos solo los campos que no sean nulos en el DTO
-        if (dto.rif() != null) proveedorAActualizar.setRif(dto.rif());
-        if (dto.nombre() != null) proveedorAActualizar.setNombre(dto.nombre());
-        if (dto.telefono() != null) proveedorAActualizar.setTelefono(dto.telefono());
-        if (dto.correo() != null) proveedorAActualizar.setCorreo(dto.correo());
-        if (dto.direccion() != null) proveedorAActualizar.setDireccion(dto.direccion());
-        if (dto.facturas() != null) proveedorAActualizar.setFacturas(dto.facturas());
+        // --- REGLA 2: VALIDAR RIF DUPLICADO ---
+        if (dto.rif() != null && !dto.rif().isBlank()) {
+            // Revisar si OTRO proveedor (con ID diferente) ya usa este RIF
+            boolean rifYaExiste = proveedores.stream()
+                .anyMatch(p -> !p.getId().equals(id) && p.getRif().equalsIgnoreCase(dto.rif()));
+            
+            if (rifYaExiste) {
+                // 409 Conflict: El RIF ya existe en otro proveedor.
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                             .body("Error: El RIF " + dto.rif() + " ya está registrado en otro proveedor.");
+            }
+proveedorAActualizar.setRif(dto.rif());
+        
+        } else if (dto.rif() != null && dto.rif().isBlank()) {
+             // --- REGLA 3: No se permite campo vacío ---
+            return ResponseEntity.badRequest().body("Error: El RIF no puede estar vacío.");
+        }
+
+        // --- REGLA 3: VALIDAR CAMPOS VACÍOS Y FORMATO ---
+        
+        if (dto.nombre() != null) {
+            if (dto.nombre().isBlank()) {
+                return ResponseEntity.badRequest().body("Error: El nombre no puede estar vacío.");
+            }
+            proveedorAActualizar.setNombre(dto.nombre());
+}
+
+        if (dto.telefono() != null) {
+            if (dto.telefono().isBlank()) {
+                return ResponseEntity.badRequest().body("Error: El teléfono no puede estar vacío.");
+            }
+            proveedorAActualizar.setTelefono(dto.telefono());
+}
+
+        if (dto.correo() != null) {
+            if (dto.correo().isBlank()) {
+                return ResponseEntity.badRequest().body("Error: El correo no puede estar vacío.");
+            }
+            // Validación simple de formato
+            if (!dto.correo().contains("@") || !dto.correo().contains(".")) {
+                return ResponseEntity.badRequest().body("Error: El formato del correo no es válido.");
+            }
+            proveedorAActualizar.setCorreo(dto.correo());
+}
+
+        if (dto.direccion() != null) {
+            if (dto.direccion().isBlank()) {
+                return ResponseEntity.badRequest().body("Error: La dirección no puede estar vacía.");
+            }
+            proveedorAActualizar.setDireccion(dto.direccion());
+}
+
+        if (dto.facturas() != null) {
+proveedorAActualizar.setFacturas(dto.facturas());
+}
 
         manejador.guardarProveedores(proveedores);
         return ResponseEntity.ok(proveedorAActualizar); // 200 OK

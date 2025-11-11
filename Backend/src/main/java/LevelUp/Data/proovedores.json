@@ -1,26 +1,73 @@
-[
-  {
-    "id": "prov-uuid-001",
-    "rif": "J-12345678-9",
-    "nombre": "Apple Inc. (Distribuidor Oficial)",
-    "telefono": "+1-800-MY-APPLE",
-    "correo": "business@apple.com",
-    "direccion": "1 Apple Park Way, Cupertino, CA",
-    "facturas": [
-      "ORD-2025-001",
-      "ORD-2025-005"
-    ]
-  },
-  {
-    "id": "prov-uuid-002",
-    "rif": "J-98765432-1",
-    "nombre": "Accesorios Tech Vzla",
-    "telefono": "+58-212-555-1234",
-    "correo": "ventas@acctech.com",
-    "direccion": "Av. Principal, Caracas",
-    "facturas": [
-      "F-0010",
-      "F-0025"
-    ]
-  }
-]
+[ {
+  "id" : "prov-uuid-001",
+  "rif" : "J-12345678-9",
+  "nombre" : "Apple Inc. (Distribuidor Oficial)",
+  "telefono" : "+582426789056",
+  "correo" : "business@apple.com",
+  "direccion" : "1 Apple Park Way, Cupertino, CA",
+  "facturas" : [ "ORD-006", "ORD-007" ]
+}, {
+  "id" : "prov-uuid-002",
+  "rif" : "J-98765432-9",
+  "nombre" : "Accesorios Tech Vzla",
+  "telefono" : "+584242051493",
+  "correo" : "ventas@acctech.com",
+  "direccion" : "Av. Principal, Caracas",
+  "facturas" : [ "ORD-001", "F-007" ]
+}, {
+  "id" : "4cf6c4cf-8335-4318-ac8a-1b281897222c",
+  "rif" : "786977086",
+  "nombre" : "Los Rompediscoteca",
+  "telefono" : "04121128394",
+  "correo" : "rompediscotecas@gmail.com",
+  "direccion" : "hola",
+  "facturas" : [ "F-005" ]
+}, {
+  "id" : "41467d38-516b-4450-9e62-dc820574a796",
+  "rif" : "J-12345678-7",
+  "nombre" : "jcsdo",
+  "telefono" : "jnfeokn",
+  "correo" : "kfndjjnfkjwdn@gmail.com",
+  "direccion" : "kmfdok",
+  "facturas" : [ "lkfdkln" ]
+}, {
+  "id" : "c82df286-4337-4d95-a190-64a28740dbd6",
+  "rif" : "J-12345678-8",
+  "nombre" : "Holy",
+  "telefono" : "+584121128393",
+  "correo" : "lareal07xx@gmail.com",
+  "direccion" : "kjfewpjfjpw",
+  "facturas" : [ "F-007" ]
+}, {
+  "id" : "c72a3bcd-71ad-446c-9043-e5b15a2cb939",
+  "rif" : "J-12345678-5",
+  "nombre" : "ECO",
+  "telefono" : "+584242051493",
+  "correo" : "eco@gmail.com",
+  "direccion" : "El Rosal",
+  "facturas" : [ "ORD-001" ]
+}, {
+  "id" : "52bd05bb-6452-4820-9be1-109b7cd8b219",
+  "rif" : "J-12345678-1",
+  "nombre" : "Holy",
+  "telefono" : "+583455786787",
+  "correo" : "victorwe1108@gmail.com",
+  "direccion" : "hola",
+  "facturas" : [ "F-87" ]
+}, {
+  "id" : "3bd3927f-09be-4fcd-a239-b0bf2f24b380",
+  "rif" : "J-50234568-1",
+  "nombre" : "jcsdo",
+  "telefono" : "+589873456787",
+  "correo" : "ja@est.ucab.edu.ve",
+  "direccion" : "ola",
+  "facturas" : [ "ORD-017" ]
+}, {
+  "id" : "22845dd6-e7eb-4d34-bd7c-feddaea60c9f",
+  "rif" : "J-12345687-9",
+  "nombre" : "Sangroni C.A.",
+  "telefono" : "+588763456787",
+  "correo" : "sam@gmail.com",
+  "direccion" : "la casita de al lao",
+  "facturas" : [ "ORD-001", "F-345" ]
+} ]

@@ -30,4 +30,12 @@
   "apellido" : "Perez",
   "numero" : "+58422534536",
   "direccion" : "errtgr"
+}, {
+  "correo" : "sjsangroni.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$qoIlu.Bk8DO2gW2DecJZP.oNvdD5CCJ0ZNSLSCp4bLPIi4cxaP.AK",
+  "rol" : "admin",
+  "nombre" : "Samuel ",
+  "apellido" : "Sangroni",
+  "numero" : "+584142337589",
+  "direccion" : "la casita de al frente"
 } ]

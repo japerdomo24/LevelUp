@@ -29,7 +29,10 @@
                 id="rif"
                 v-model="nuevoProveedor.rif"
                 required
-                placeholder="Ej: J-123456789"
+                placeholder="Ej: J-12345678-9"
+
+                pattern="J-\d{8}-\d{1}"
+                title="El RIF debe tener el formato J-12345678-9"
               />
             </div>
           </div>
@@ -42,7 +45,10 @@
                 id="phone"
                 v-model="nuevoProveedor.telefono"
                 required
-                placeholder="Ej: +58 412-1234567"
+                placeholder="Ej: +584121234567"
+
+                pattern="\+58\d{10}"
+                title="El teléfono debe tener el formato +58 seguido de 10 dígitos (ej: +584121234567)"
               />
             </div>
 
@@ -134,14 +140,28 @@
 
             <div class="form-group">
               <label for="edit-rif">RIF *</label>
-              <input type="text" id="edit-rif" v-model="datosEditarProveedor.rif" required />
+              <input 
+                type="text" 
+                id="edit-rif" 
+                v-model="datosEditarProveedor.rif" 
+                required 
+                
+                pattern="J-\d{8}-\d{1}"
+                title="El RIF debe tener el formato J-12345678-9"/>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="edit-phone">Teléfono *</label>
-              <input type="tel" id="edit-phone" v-model="datosEditarProveedor.telefono" required />
+              <input 
+                type="tel"
+                id="edit-phone" 
+                v-model="datosEditarProveedor.telefono" 
+                required 
+                
+                pattern="\+58\d{10}"
+                title="El teléfono debe tener el formato +58 seguido de 10 dígitos (ej: +584121234567)" />
             </div>
 
             <div class="form-group">
@@ -250,6 +270,22 @@ export default {
         return;
       }
 
+      // --- INICIO DE LA MODIFICACIÓN (AÑADIMOS LA CONFIRMACIÓN) ---
+      const result = await Swal.fire({
+        title: '¿Crear Proveedor?',
+        text: `Se creará el proveedor ${this.nuevoProveedor.nombre}.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0071e3', // Botón OK (azul)
+        cancelButtonColor: '#6e6e73', // Botón Cancelar (gris)
+        confirmButtonText: 'Sí, crear',
+        cancelButtonText: 'Cancelar'
+  })
+
+  // Si el usuario presiona "Cancelar", la función se detiene aquí.
+  if (!result.isConfirmed) return;
+  // --- FIN DE LA MODIFICACIÓN ---
+
       this.loading = true
       const token = localStorage.getItem('userToken');
 
@@ -276,10 +312,35 @@ export default {
 
       } catch (error) {
         console.error('Error registrando proveedor:', error)
+        // --- INICIO DE LA SECCIÓN MODIFICADA ---
+        let errorTitulo = 'Error al registrar';
+        let errorHtml = 'No se pudo registrar el proveedor.'; // Mensaje por defecto
+
+        if (error.response) {
+        // error.response.data es el cuerpo del error que envía Spring
+        const errorData = error.response.data;
+
+        if (error.response.status === 400) {
+          // Error de VALIDACIÓN (Formato incorrecto)
+          errorTitulo = 'Datos incorrectos';
+          // 'errorData' es un objeto: {rif: "msg1", telefono: "msg2"}
+          const mensajesHtml = Object.values(errorData)
+                                .map(msg => `<li>${msg}</li>`)
+                                .join('');
+          errorHtml = `<p>No se pudo registrar debido a los siguientes errores:</p>
+                    <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
+      
+        } else if (error.response.status === 409) {
+          // Error de CONFLICTO (RIF duplicado)
+          errorTitulo = 'Conflicto de datos';
+          // 'errorData' es un string: "Error: El RIF..."
+          errorHtml = errorData; 
+      }
+    }
         Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'No se pudo registrar el proveedor.',
+          title: errorTitulo,
+          html: errorHtml,
           confirmButtonColor: '#0071e3',
         });
       } finally {
@@ -348,10 +409,33 @@ export default {
 
       } catch (error) {
         console.error('Error actualizando proveedor:', error)
+
+        // --- INICIO DE LA SECCIÓN MODIFICADA ---
+        let errorTitulo = 'Error al actualizar';
+        let errorHtml = 'No se pudo actualizar el proveedor.'; // Mensaje por defecto
+
+        if (error.response) {
+          const errorData = error.response.data;
+
+          if (error.response.status === 400) {
+            // Error de VALIDACIÓN (Formato incorrecto)
+            errorTitulo = 'Datos incorrectos';
+            const mensajesHtml = Object.values(errorData)
+                                .map(msg => `<li>${msg}</li>`)
+                                .join('');
+          errorHtml = `<p>No se pudo actualizar debido a los siguientes errores:</p>
+                    <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
+      
+          } else if (error.response.status === 409) {
+            // Error de CONFLICTO (RIF duplicado)
+            errorTitulo = 'Conflicto de datos';
+            errorHtml = errorData; 
+          }
+        }
         Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'No se pudo actualizar el proveedor.',
+          title: errorTitulo,
+          html: errorHtml,
           confirmButtonColor: '#0071e3',
         });
       } finally {

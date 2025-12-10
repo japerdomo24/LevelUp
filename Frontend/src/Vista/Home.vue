@@ -48,10 +48,6 @@
         </div>
       </div>
     </div>
-
-    <button v-if="user?.rol === 'admin'" class="edit-home-btn" @click="$emit('edit-home')">
-      ✏️ Editar Página
-    </button>
   </div>
 </template>
 

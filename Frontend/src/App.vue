@@ -58,12 +58,6 @@
           @product-created="manejarProductoCreado"
         />
 
-        <EditHome
-          v-else-if="currentPage === 'edit-home' && user?.rol === 'admin'"
-          @change-page="cambiarPagina"
-          @home-updated="manejarHomeActualizado"
-        />
-
         <div v-else-if="currentPage === 'auth'">
           <Login
             v-if="authMode === 'login'"
@@ -112,7 +106,6 @@ import Perfil from './Vista/Perfil.vue'
 import Proveedores from './Vista/Proveedores.vue'
 import Ventas from './Vista/Ventas.vue'
 import CrearProducto from './Vista/CrearProducto.vue'
-import EditHome from './Vista/EditHome.vue'
 
 // --- Importaciones de API ---
 import apiClient from '@/api/axiosConfig'
@@ -143,7 +136,6 @@ export default {
     Suppliers: Proveedores,
     Sales: Ventas,
     CreateProduct: CrearProducto,
-    EditHome,
   },
   data() {
     return {

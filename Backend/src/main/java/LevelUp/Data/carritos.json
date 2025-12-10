@@ -21,4 +21,13 @@
   "correoUsuario" : "ja@est.ucab.edu.ve",
   "items" : [ ],
   "total" : 0.0
+}, {
+  "correoUsuario" : "mperezpu@ucab.edu.ve",
+  "items" : [ {
+    "productoId" : "adf3ffdb-67b2-4310-b681-2ba9e02b9949",
+    "serie" : "16",
+    "cantidad" : 1,
+    "precioUnitario" : 600.0
+  } ],
+  "total" : 600.0
 } ]

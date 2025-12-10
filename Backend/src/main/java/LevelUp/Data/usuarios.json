@@ -1,33 +1,25 @@
 [ {
-  "correo" : "japerdomo.24@est.ucab.edu.ve",
-  "clave" : "$2a$10$jwoqEEbPWrtDfFiidL.kW.4OJFx/dq0PPlqCEzEZJhxhUAULKupoO",
-  "rol" : "admin",
-  "nombre" : "Jesús",
-  "apellido" : "Perdomo",
-  "numero" : "0412-1234567",
-  "direccion" : "Av. Principal, Edif. A, Apto 1"
-}, {
   "correo" : "ejemplo.24@est.ucab.edu.ve",
   "clave" : "$2a$10$8k./owFpYZpQPMnFlGBh/eEH.jP/lvvoe9oCo4.GPpV1IyXXCo8Dm",
-  "rol" : "admin",
+  "rol" : "user",
   "nombre" : "Usuario",
   "apellido" : "Ejemplo",
   "numero" : "0414-9876543",
   "direccion" : "Calle B, Casa 2"
 }, {
-  "correo" : "japerdome.24@est.ucab.edu.ve",
-  "clave" : "$2a$10$ALxv5UfKdDfU8ZVMN1JBQem9i2EmsRGxbtQ1vxk2GBzFWhme7gkZu",
-  "rol" : "user",
+  "correo" : "japerdomo.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$avb5RRtJ0iI8Ya8OXFC8r./rxE3UVi7e6lRFyrjSdQfpRuAQkuJMu",
+  "rol" : "admin",
   "nombre" : "Jose",
   "apellido" : "Perdomo",
   "numero" : "+58422534536",
-  "direccion" : "Caracas"
+  "direccion" : "Av Caracas Caracas"
 }, {
-  "correo" : "ja@est.ucab.edu.ve",
-  "clave" : "$2a$10$/eALQkt.O8K7Z.5Jlle3ieI6IbUjtmcYuZnbpJGECJjif35upU196",
+  "correo" : "mperezpu@ucab.edu.ve",
+  "clave" : "$2a$10$cjrdpJK/sVSTt/pvfWZav.YwAdIDi6KNoxSCZzp5568OlHyNwe3JC",
   "rol" : "user",
-  "nombre" : "Jose",
+  "nombre" : "Maria",
   "apellido" : "Perez",
   "numero" : "+58422534536",
-  "direccion" : "errtgr"
+  "direccion" : "Cumbres de curumo"
 } ]

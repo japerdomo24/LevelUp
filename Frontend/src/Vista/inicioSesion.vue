@@ -35,7 +35,7 @@
             <span class="checkmark"></span>
             Recordarme
           </label>
-          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+
         </div>
 
         <button type="submit" class="btn-login" :disabled="loading">

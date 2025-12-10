@@ -16,7 +16,11 @@
               v-model="registerData.nombre"
               placeholder="Tu nombre"
               required
+              @blur="validarNombre"
             />
+            <div v-if="errores.nombre" class="error-message">
+              {{ errores.nombre }}
+            </div>
           </div>
 
           <div class="form-group">
@@ -27,7 +31,11 @@
               v-model="registerData.apellido"
               placeholder="Tu apellido"
               required
+              @blur="validarApellido"
             />
+            <div v-if="errores.apellido" class="error-message">
+              {{ errores.apellido }}
+            </div>
           </div>
         </div>
 
@@ -41,8 +49,8 @@
             required
             @blur="validarDominioEmail"
           />
-          <div v-if="isEmailInvalid" class="error-message">
-            El correo debe ser @ucab.edu.ve o @est.ucab.edu.ve
+          <div v-if="errores.correo" class="error-message">
+            {{ errores.correo }}
           </div>
         </div>
 
@@ -56,8 +64,8 @@
             required
             minlength="6"
           />
-          <div class="password-strength" :class="passwordStrength">
-            Seguridad: {{ passwordStrengthText }}
+          <div class="password-strength" :class="fuerzaClave">
+            Seguridad: {{ textoFuerzaClave }}
           </div>
         </div>
 
@@ -70,36 +78,43 @@
             placeholder="••••••••"
             required
           />
-          <div v-if="passwordMismatch" class="error-message">Las contraseñas no coinciden</div>
+          <div v-if="clavesNoCoinciden" class="error-message">Las contraseñas no coinciden</div>
         </div>
 
         <div class="form-group">
-          <label for="phone">Teléfono</label>
-          <input type="tel" id="phone" v-model="registerData.numero" placeholder="+58 412 123 4567" />
+          <label for="phone">Teléfono *</label>
+          <input
+            type="tel"
+            id="phone"
+            v-model="registerData.numero"
+            placeholder="+58 412 123 4567"
+            @blur="validarNumero"
+            required
+          />
+          <div v-if="errores.numero" class="error-message">
+            {{ errores.numero }}
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="address">Dirección</label>
+          <label for="address">Dirección *</label>
           <textarea
             id="address"
             v-model="registerData.direccion"
             placeholder="Tu dirección completa"
             rows="2"
+            @blur="validarDireccion"
+            required
           ></textarea>
-        </div>
-
-        <div class="form-options">
-          <label class="checkbox-label required">
-            <input type="checkbox" v-model="registerData.terms" required />
-            <span class="checkmark"></span>
-            Acepto los <a href="#" class="link">términos y condiciones</a> *
-          </label>
+          <div v-if="errores.direccion" class="error-message">
+            {{ errores.direccion }}
+          </div>
         </div>
 
         <button
           type="submit"
           class="btn-register"
-          :disabled="loading || passwordMismatch || isEmailInvalid"
+          :disabled="loading || clavesNoCoinciden || !esFormularioValido"
         >
           <span v-if="loading">Creando cuenta...</span>
           <span v-else>Crear Cuenta</span>
@@ -109,7 +124,7 @@
       <div class="register-footer">
         <p>
           ¿Ya tienes una cuenta?
-          <a href="#" @click.prevent="irALogin" class="link">Inicia sesión aquí</a>
+          <a href="" @click.prevent="irALogin" class="link">Inicia sesión aquí</a>
         </p>
       </div>
     </div>
@@ -135,12 +150,18 @@ export default {
         rol: 'user',
         terms: false,
       },
+      errores: {
+        nombre: null,
+        apellido: null,
+        correo: null,
+        numero: null,
+        direccion: null,
+      },
       loading: false,
-      isEmailInvalid: false,
     }
   },
   computed: {
-    passwordMismatch() {
+    clavesNoCoinciden() {
       return (
         this.registerData.clavePlana &&
         this.registerData.confirmPassword &&
@@ -148,7 +169,7 @@ export default {
       )
     },
 
-    passwordStrength() {
+    fuerzaClave() {
       const password = this.registerData.clavePlana
       if (!password) return 'weak'
       if (password.length < 6) return 'weak'
@@ -159,40 +180,95 @@ export default {
       return 'medium'
     },
 
-    passwordStrengthText() {
+    textoFuerzaClave() {
       const strengths = {
         weak: 'Débil',
         medium: 'Media',
         strong: 'Fuerte',
       }
-      return strengths[this.passwordStrength]
+      return strengths[this.fuerzaClave]
     },
+
+    esFormularioValido() {
+      // Revisa que no haya ningún mensaje de error activo
+      return !this.errores.nombre &&
+        !this.errores.apellido &&
+        !this.errores.correo &&
+        !this.errores.numero &&
+        !this.errores.direccion;
+    }
   },
-  // --- MÉTODOS TRADUCIDOS ---
   methods: {
     validarDominioEmail() {
       if (!this.registerData.correo) {
-        this.isEmailInvalid = false;
+        this.errores.correo = 'El correo es obligatorio.';
         return;
       }
       const isValid = this.registerData.correo.endsWith('@ucab.edu.ve') ||
         this.registerData.correo.endsWith('@est.ucab.edu.ve');
-      this.isEmailInvalid = !isValid;
+
+      this.errores.correo = isValid ? null : 'Debe ser un correo @ucab.edu.ve o @est.ucab.edu.ve';
+    },
+
+    validarNombre() {
+      if (!this.registerData.nombre) {
+        this.errores.nombre = 'El nombre es obligatorio.';
+        return;
+      }
+      const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]+$/;
+      this.errores.nombre = regex.test(this.registerData.nombre) ? null : 'El nombre solo debe contener letras.';
+    },
+
+    validarApellido() {
+      if (!this.registerData.apellido) {
+        this.errores.apellido = 'El apellido es obligatorio.';
+        return;
+      }
+      const regex = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]+$/;
+      this.errores.apellido = regex.test(this.registerData.apellido) ? null : 'El apellido solo debe contener letras.';
+    },
+
+    // --- ¡MÉTODO ACTUALIZADO! ---
+    validarNumero() {
+      // CAMBIO: Ahora es obligatorio
+      if (!this.registerData.numero) {
+        this.errores.numero = 'El teléfono es obligatorio.';
+        return;
+      }
+      const regex = /^[0-9+\-() ]+$/;
+      this.errores.numero = regex.test(this.registerData.numero) ? null : 'Formato de teléfono inválido.';
+    },
+
+    // --- ¡MÉTODO ACTUALIZADO! ---
+    validarDireccion() {
+      // CAMBIO: Ahora es obligatorio
+      if (!this.registerData.direccion) {
+        this.errores.direccion = 'La dirección es obligatoria.';
+        return;
+      }
+      this.errores.direccion = this.registerData.direccion.length < 10 ? 'La dirección parece demasiado corta.' : null;
     },
 
     async manejarRegistro() {
-      // Validaciones con Alertas Clickables
+      // 1. Ejecutar todas las validaciones
+      this.validarNombre();
+      this.validarApellido();
       this.validarDominioEmail();
-      if (this.isEmailInvalid) {
+      this.validarNumero();
+      this.validarDireccion();
+
+      // 2. Comprobar si hay algún error
+      if (!this.esFormularioValido) {
         Swal.fire({
           icon: 'warning',
-          title: 'Correo Inválido',
-          text: 'Debe ser un correo con dominio @ucab.edu.ve o @est.ucab.edu.ve',
+          title: 'Formulario Incompleto',
+          text: 'Por favor, revisa los campos marcados en rojo.',
           confirmButtonColor: '#0071e3',
         });
         return;
       }
-      if (this.passwordMismatch) {
+
+      if (this.clavesNoCoinciden) {
         Swal.fire({
           icon: 'warning',
           title: 'Contraseñas no coinciden',
@@ -200,16 +276,8 @@ export default {
         });
         return
       }
-      if (!this.registerData.terms) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Términos y Condiciones',
-          text: 'Debes aceptar los términos para continuar.',
-          confirmButtonColor: '#0071e3',
-        });
-        return
-      }
 
+      // 3. Si todo está bien, enviar a la API
       this.loading = true
       const apiPayload = {
         correo: this.registerData.correo,
@@ -217,8 +285,8 @@ export default {
         rol: this.registerData.rol,
         nombre: this.registerData.nombre,
         apellido: this.registerData.apellido,
-        numero: this.registerData.numero,
-        direccion: this.registerData.direccion,
+        numero: this.registerData.numero, // Ya está validado
+        direccion: this.registerData.direccion, // Ya está validado
       }
 
       try {
@@ -227,17 +295,15 @@ export default {
           apiPayload
         )
 
-        // ¡Alerta CLICKABLE de éxito!
         await Swal.fire({
           icon: 'success',
           title: '¡Registro exitoso!',
           text: 'Por favor, inicia sesión para continuar.',
           confirmButtonColor: '#0071e3',
         })
-        this.irALogin(); // Llama al método traducido
+        this.irALogin();
 
       } catch (error) {
-        // Alertas CLICKABLE de error
         if (error.response && error.response.status === 409) {
           Swal.fire({
             icon: 'error',
@@ -257,7 +323,7 @@ export default {
     },
 
     irALogin() {
-      this.$emit('change-auth-mode', 'register') // El evento 'register' le dice a App.vue que cambie a 'login'
+      this.$emit('change-auth-mode', 'login')
     },
   },
 }

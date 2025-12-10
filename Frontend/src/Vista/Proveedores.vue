@@ -238,14 +238,16 @@ export default {
     },
 
     async crearProveedor() {
-      if (!this.validarProveedor(this.nuevoProveedor)) {
+      // --- ¡NUEVA VALIDACIÓN! ---
+      const errorValidacion = this.validarProveedor(this.nuevoProveedor);
+      if (errorValidacion) {
         Swal.fire({
           icon: 'warning',
-          title: 'Campos incompletos',
-          text: 'Por favor, complete todos los campos requeridos (*).',
+          title: 'Datos inválidos',
+          text: errorValidacion, // Muestra el error específico
           confirmButtonColor: '#0071e3'
         });
-        return
+        return;
       }
 
       this.loading = true
@@ -292,14 +294,16 @@ export default {
     },
 
     async actualizarProveedor() {
-      if (!this.validarProveedor(this.datosEditarProveedor)) {
+      // --- ¡NUEVA VALIDACIÓN! ---
+      const errorValidacion = this.validarProveedor(this.datosEditarProveedor);
+      if (errorValidacion) {
         Swal.fire({
           icon: 'warning',
-          title: 'Campos incompletos',
-          text: 'Por favor, complete todos los campos requeridos (*).',
+          title: 'Datos inválidos',
+          text: errorValidacion, // Muestra el error específico
           confirmButtonColor: '#0071e3'
         });
-        return
+        return;
       }
 
       const result = await Swal.fire({
@@ -354,15 +358,32 @@ export default {
         this.loading = false
       }
     },
-
+    // --- ¡MÉTODO DE VALIDACIÓN ACTUALIZADO! ---
     validarProveedor(proveedor) {
-      return (
-        proveedor.nombre &&
-        proveedor.rif &&
-        proveedor.telefono &&
-        proveedor.correo &&
-        proveedor.direccion
-      )
+      if (!proveedor.nombre || proveedor.nombre.trim() === '') {
+        return 'El campo "Nombre" es obligatorio.';
+      }
+      if (!proveedor.rif || proveedor.rif.trim() === '') {
+        return 'El campo "RIF" es obligatorio.';
+      }
+      if (!proveedor.telefono || proveedor.telefono.trim() === '') {
+        return 'El campo "Teléfono" es obligatorio.';
+      }
+      // Regex simple para validar teléfono (números, +, -)
+      if (!/^[0-9+\-() ]+$/.test(proveedor.telefono)) {
+        return 'El formato del teléfono no es válido.';
+      }
+      if (!proveedor.correo || proveedor.correo.trim() === '') {
+        return 'El campo "Correo" es obligatorio.';
+      }
+      // Regex simple para validar email
+      if (!/^\S+@\S+\.\S+$/.test(proveedor.correo)) {
+        return 'El formato del correo no es válido.';
+      }
+      if (!proveedor.direccion || proveedor.direccion.trim() === '') {
+        return 'El campo "Dirección" es obligatorio.';
+      }
+      return null; // Si todo es válido, devuelve null
     },
 
     limpiarFormularioNuevo() {
@@ -601,9 +622,9 @@ export default {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e5e7;
   transition: all 0.3s ease;
-  display: flex; /* Añadido */
-  flex-direction: column; /* Añadido */
-  justify-content: space-between; /* Añadido */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .supplier-card:hover {

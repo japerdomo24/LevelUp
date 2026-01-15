@@ -198,17 +198,21 @@ export default {
         });
 
         if (result.isConfirmed) {
+            const token = localStorage.getItem('userToken');
             try {
                 // Llamada a la API (Asumiendo endpoint REST estándar)
                 // await apiClient.delete(`/carrito/item/${productoId}`);
+                const response = await apiClient.delete(`/carrito/${productoId}`, {headers: { Authorization: `Bearer ${token}` }
+                });
 
                 // Actualización Local (Simulación para que funcione la UI inmediatamente)
-                const itemIndex = this.carrito.items.findIndex(i => i.productoId === productoId);
-                if (itemIndex > -1) {
-                    const item = this.carrito.items[itemIndex];
-                    this.carrito.total -= (item.precioUnitario * item.cantidad);
-                    this.carrito.items.splice(itemIndex, 1);
-                }
+                //const itemIndex = this.carrito.items.findIndex(i => i.productoId === productoId);
+                //if (itemIndex > -1) {
+                  //  const item = this.carrito.items[itemIndex];
+                    //this.carrito.total -= (item.precioUnitario * item.cantidad);
+                    //this.carrito.items.splice(itemIndex, 1);
+                //}
+                this.carrito = response.data; // Actualizar con la respuesta del back
 
                 Swal.fire({
                     icon: 'success',
@@ -311,24 +315,24 @@ export default {
         }
 
         this.loadingCheckout = true;
+        const token = localStorage.getItem('userToken');
 
         try {
             // Simular proceso de pago
             await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Aquí iría: await apiClient.post('/facturas', { carritoId: ..., tarjetaId: ... });
+            const response = await apiClient.post('/carrito/facturar', {}, {headers: { Authorization: `Bearer ${token}` }
+            });
 
             await Swal.fire({
                 icon: 'success',
-                title: '¡Pago Exitoso!',
-                text: 'Tu factura ha sido generada y enviada a tu correo.',
+                title: '¡Compra realizada!',
+                text: `Factura generada con ID: ${response.data.id}`,
                 confirmButtonColor: '#34c759'
             });
 
             // Limpiar carrito tras éxito
-            this.carrito.items = [];
-            this.carrito.total = 0;
-            this.irATienda(); // Redirigir a home
+            this.carrito = { items: [], total: 0 };
+            this.$emit('change-page', 'home');
 
         // eslint-disable-next-line no-unused-vars
         } catch (error) {

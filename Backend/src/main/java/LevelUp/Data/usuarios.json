@@ -22,4 +22,28 @@
   "apellido" : "Perez",
   "numero" : "+58422534536",
   "direccion" : "Cumbres de curumo"
+}, {
+  "correo" : "vmramos.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$3XSN7WYdkEOo8rY64gg2eu5aIqrzVU4mJtkfrzAnI3tMjTFd6zMui",
+  "rol" : "admin",
+  "nombre" : "Victor",
+  "apellido" : "Ramos",
+  "numero" : "+584121993112",
+  "direccion" : "La Floridaaa"
+}, {
+  "correo" : "Ali.24@est.ucab.edu.ve",
+  "clave" : "$2a$10$1.xfqlSjA6rh/aJLa3jp1uy0rLYi2Co54wWANV4/tZZkbvPQzAJcm",
+  "rol" : "user",
+  "nombre" : "Ali",
+  "apellido" : "Dahouk",
+  "numero" : "+584248796578",
+  "direccion" : "El cafetal"
+}, {
+  "correo" : "Jramirez.24@ucab.edu.ve",
+  "clave" : "$2a$10$M2hN6UyL3YJ1fEc4QXI5XutK0i7Jhcok98OUaLT9qwYgVxN/meJJa",
+  "rol" : "user",
+  "nombre" : "Jose",
+  "apellido" : "Ramirez",
+  "numero" : "+584156264578",
+  "direccion" : "El Marquez"
 } ]

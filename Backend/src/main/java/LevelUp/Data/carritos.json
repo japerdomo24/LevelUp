@@ -30,4 +30,21 @@
     "precioUnitario" : 600.0
   } ],
   "total" : 600.0
+}, {
+  "correoUsuario" : "vmramos.24@est.ucab.edu.ve",
+  "items" : [ {
+    "productoId" : "7e9b8f92-d615-4b7c-a5d4-bf0a97d78909",
+    "serie" : "iPhone 17",
+    "cantidad" : 1,
+    "precioUnitario" : 1300.0
+  } ],
+  "total" : 1300.0
+}, {
+  "correoUsuario" : "Jramirez.24@ucab.edu.ve",
+  "items" : [ ],
+  "total" : 0.0
+}, {
+  "correoUsuario" : "Ali.24@est.ucab.edu.ve",
+  "items" : [ ],
+  "total" : 0.0
 } ]

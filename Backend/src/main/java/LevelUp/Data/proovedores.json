@@ -2,24 +2,32 @@
   "id" : "prov-uuid-002",
   "rif" : "J-98765432-1",
   "nombre" : "Accesorios Tech Vzla",
-  "telefono" : "+58-212-555-1234",
+  "telefono" : "+582123456789",
   "correo" : "ventas@acctech.com",
   "direccion" : "Av. Principal, Caracas",
   "facturas" : [ "F-0010", "F-0025" ]
 }, {
-  "id" : "9ab80c8c-b826-4a51-aedc-b68fb22c3393",
-  "rif" : "2312214",
-  "nombre" : "Jose",
-  "telefono" : "+58422534536",
-  "correo" : "proveedor@gmail",
-  "direccion" : "fdfsdfsd",
-  "facturas" : [ "1", "2", "3" ]
+  "id" : "34e013ca-fa8a-4744-aaa4-4c065ff2a298",
+  "rif" : "J-67898789-3",
+  "nombre" : "AppleTecno",
+  "telefono" : "+581345678809",
+  "correo" : "Appletecno@gmail.com",
+  "direccion" : "Las Mercedes",
+  "facturas" : [ "F-0019" ]
 }, {
-  "id" : "b1cc8a97-b65a-4f57-a1ba-47f7543df92b",
-  "rif" : "J-12452322",
-  "nombre" : "EApple ",
-  "telefono" : "+58422534536",
-  "correo" : "movalles@usb.ve",
-  "direccion" : "Universidad Simon Bolivar",
-  "facturas" : [ "33", "34" ]
+  "id" : "83782de7-50c1-426e-8b8b-a1ff5d7349e5",
+  "rif" : "J-53678484-8",
+  "nombre" : "Canguro",
+  "telefono" : "+584267288383",
+  "correo" : "canguro@gmail.com",
+  "direccion" : "Sambil Caracas",
+  "facturas" : [ "ORD-0045" ]
+}, {
+  "id" : "d8f60226-dc34-4a72-bc81-de96156fa5ee",
+  "rif" : "J-74384380-9",
+  "nombre" : "Holy",
+  "telefono" : "+588934276427",
+  "correo" : "Holy@gmail.com",
+  "direccion" : "Macaracuay",
+  "facturas" : [ "F-0001", "F-0888" ]
 } ]

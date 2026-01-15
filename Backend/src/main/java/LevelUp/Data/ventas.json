@@ -31,4 +31,26 @@
     "precioUnitario" : 249.0
   } ],
   "totalVenta" : 249.0
+}, {
+  "id" : "6036212c-5108-4722-9f40-e876c8d50961",
+  "fecha" : "2026-01-15T06:12:20.603381900Z",
+  "correoUsuario" : "Ali.24@est.ucab.edu.ve",
+  "items" : [ {
+    "productoId" : "7e9b8f92-d615-4b7c-a5d4-bf0a97d78909",
+    "serie" : "iPhone 17",
+    "cantidad" : 1,
+    "precioUnitario" : 1300.0
+  } ],
+  "totalVenta" : 1300.0
+}, {
+  "id" : "13e29fdd-b049-434c-81b5-7eccf68b4b99",
+  "fecha" : "2026-01-15T06:15:47.701379900Z",
+  "correoUsuario" : "Ali.24@est.ucab.edu.ve",
+  "items" : [ {
+    "productoId" : "dc5af09b-a0ae-4538-a946-4922a8ef7eb4",
+    "serie" : "AirPods",
+    "cantidad" : 1,
+    "precioUnitario" : 249.0
+  } ],
+  "totalVenta" : 249.0
 } ]

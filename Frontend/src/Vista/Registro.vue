@@ -83,19 +83,24 @@
 
         <div class="form-group">
           <label for="phone">Teléfono *</label>
-          <input
-            type="tel"
-            id="phone"
-            v-model="registerData.numero"
-            placeholder="+58 412 123 4567"
-            @blur="validarNumero"
-            required
-          />
+          <div class="phone-input-group">
+            <div class="fixed-prefix">🇻🇪 +58</div>
+
+            <input
+              type="tel"
+              id="phone"
+              v-model="registerData.numero"
+              placeholder="4121234567"
+              @blur="validarNumero"
+              required
+              maxlength="10"
+              class="phone-body-input"
+            />
+          </div>
           <div v-if="errores.numero" class="error-message">
             {{ errores.numero }}
           </div>
         </div>
-
         <div class="form-group">
           <label for="address">Dirección *</label>
           <textarea
@@ -190,7 +195,6 @@ export default {
     },
 
     esFormularioValido() {
-      // Revisa que no haya ningún mensaje de error activo
       return !this.errores.nombre &&
         !this.errores.apellido &&
         !this.errores.correo &&
@@ -228,20 +232,18 @@ export default {
       this.errores.apellido = regex.test(this.registerData.apellido) ? null : 'El apellido solo debe contener letras.';
     },
 
-    // --- ¡MÉTODO ACTUALIZADO! ---
+    // --- VALIDACIÓN DE TELÉFONO ACTUALIZADA ---
     validarNumero() {
-      // CAMBIO: Ahora es obligatorio
       if (!this.registerData.numero) {
         this.errores.numero = 'El teléfono es obligatorio.';
         return;
       }
-      const regex = /^[0-9+\-() ]+$/;
-      this.errores.numero = regex.test(this.registerData.numero) ? null : 'Formato de teléfono inválido.';
+      // Regex estricto: Solo 10 dígitos numéricos
+      const regex = /^\d{10}$/;
+      this.errores.numero = regex.test(this.registerData.numero) ? null : 'Ingresa los 10 dígitos (Ej: 4121234567).';
     },
 
-    // --- ¡MÉTODO ACTUALIZADO! ---
     validarDireccion() {
-      // CAMBIO: Ahora es obligatorio
       if (!this.registerData.direccion) {
         this.errores.direccion = 'La dirección es obligatoria.';
         return;
@@ -277,16 +279,20 @@ export default {
         return
       }
 
-      // 3. Si todo está bien, enviar a la API
+      // 3. Preparar datos y enviar (+58 CONCATENADO)
       this.loading = true
+
+      // Aquí unimos el prefijo con el cuerpo
+      const telefonoCompleto = '+58' + this.registerData.numero.trim();
+
       const apiPayload = {
         correo: this.registerData.correo,
         clavePlana: this.registerData.clavePlana,
         rol: this.registerData.rol,
         nombre: this.registerData.nombre,
         apellido: this.registerData.apellido,
-        numero: this.registerData.numero, // Ya está validado
-        direccion: this.registerData.direccion, // Ya está validado
+        numero: telefonoCompleto, // <-- Enviamos el número completo
+        direccion: this.registerData.direccion,
       }
 
       try {
@@ -330,7 +336,7 @@ export default {
 </script>
 
 <style scoped>
-/* ... (Todos tus estilos <style scoped> permanecen exactamente igual) ... */
+/* ESTILOS GENERALES (Mantenidos) */
 .register-container {
   display: flex;
   justify-content: center;
@@ -338,7 +344,6 @@ export default {
   min-height: 70vh;
   padding: 40px 20px;
 }
-
 .register-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
@@ -349,38 +354,31 @@ export default {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 .register-header {
   text-align: center;
   margin-bottom: 30px;
 }
-
 .register-header h2 {
   font-size: 28px;
   font-weight: 700;
   color: #1d1d1f;
   margin-bottom: 8px;
 }
-
 .register-header p {
   color: #6e6e73;
   font-size: 16px;
 }
-
 .register-form {
   margin-bottom: 25px;
 }
-
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
-
 .form-group {
   margin-bottom: 20px;
 }
-
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -389,7 +387,8 @@ export default {
   font-size: 14px;
 }
 
-.form-group input,
+/* INPUTS ESTÁNDAR */
+.form-group input:not(.phone-body-input),
 .form-group textarea {
   width: 100%;
   padding: 12px 16px;
@@ -400,7 +399,6 @@ export default {
   background: white;
   font-family: inherit;
 }
-
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
@@ -408,31 +406,40 @@ export default {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-.form-hint {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-  color: #8e8e93;
-  font-style: italic;
+/* --- NUEVOS ESTILOS PARA EL TELÉFONO (+58) --- */
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-
-.password-strength {
-  font-size: 12px;
-  margin-top: 5px;
-  font-weight: 500;
+.fixed-prefix {
+  background-color: #f5f5f7;
+  color: #6e6e73;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
 }
-
-.password-strength.weak {
-  color: #ff3b30;
+.phone-body-input {
+  flex: 1; /* Ocupa el resto del espacio */
+  padding: 12px 16px;
+  border: 2px solid #d2d2d7;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+  width: 100%;
 }
-
-.password-strength.medium {
-  color: #ff9500;
+.phone-body-input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
-
-.password-strength.strong {
-  color: #34c759;
-}
+/* ---------------------------------------------- */
 
 .error-message {
   color: #ff3b30;
@@ -440,55 +447,14 @@ export default {
   margin-top: 5px;
   font-weight: 500;
 }
-
-.form-options {
-  margin-bottom: 25px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  cursor: pointer;
-  color: #1d1d1f;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.checkbox-label.required {
-  font-weight: 600;
-}
-
-.checkbox-label input {
-  margin-right: 10px;
-  margin-top: 2px;
-}
-
-.demo-info {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 12px;
-  padding: 15px;
-  margin: 20px 0;
-}
-
-.demo-info h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #856404;
-  margin-bottom: 8px;
-}
-
-.demo-info p {
+.password-strength {
   font-size: 12px;
-  color: #856404;
-  line-height: 1.4;
-  margin-bottom: 5px;
+  margin-top: 5px;
+  font-weight: 500;
 }
-
-.demo-info strong {
-  color: #5a4a00;
-}
+.password-strength.weak { color: #ff3b30; }
+.password-strength.medium { color: #ff9500; }
+.password-strength.strong { color: #34c759; }
 
 .btn-register {
   width: 100%;
@@ -502,12 +468,10 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .btn-register:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(52, 199, 89, 0.3);
 }
-
 .btn-register:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -518,38 +482,21 @@ export default {
   border-top: 1px solid #d2d2d7;
   padding-top: 20px;
 }
-
 .register-footer p {
   color: #6e6e73;
   margin: 0;
 }
-
 .link {
   color: #0071e3;
   text-decoration: none;
   font-weight: 600;
 }
-
 .link:hover {
   text-decoration: underline;
 }
 
-/* Responsive */
 @media (max-width: 480px) {
-  .register-card {
-    padding: 30px 20px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .demo-info {
-    padding: 12px;
-  }
-
-  .demo-info p {
-    font-size: 11px;
-  }
+  .register-card { padding: 30px 20px; }
+  .form-row { grid-template-columns: 1fr; }
 }
 </style>

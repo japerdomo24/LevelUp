@@ -63,7 +63,17 @@
 
               <div class="form-group">
                 <label>Teléfono</label>
-                <input v-model="form.numero" type="tel" placeholder="+58..." />
+                <div class="phone-input-group">
+                  <div class="fixed-prefix">🇻🇪 +58</div>
+
+                  <input
+                  v-model="form.numero"
+                  type="tel"
+                  placeholder="4121234567"
+                  class="phone-body-input"
+                  maxlength="10"
+                />
+                </div>
               </div>
 
               <div class="form-group">
@@ -129,13 +139,18 @@ export default {
   methods: {
     // 1. Activar modo edición
     activarEdicion() {
-      // Copiamos los datos actuales al formulario para no mutar el prop directamente
-      this.form = {
-        nombre: this.user.nombre,
-        apellido: this.user.apellido,
-        numero: this.user.numero,
-        direccion: this.user.direccion
-      };
+      this.form.nombre = this.user.nombre;
+      this.form.apellido = this.user.apellido;
+      this.form.direccion = this.user.direccion;
+
+      // Si existe un número y empieza por +58, lo quitamos para editar
+      if (this.user.numero && this.user.numero.startsWith('+58')) {
+        this.form.numero = this.user.numero.replace('+58', '');
+      } else {
+        // Si es un número viejo sin formato o vacío, lo dejamos tal cual o vacío
+        this.form.numero = this.user.numero || '';
+      }
+
       this.isEditing = true;
     },
 
@@ -143,24 +158,42 @@ export default {
       this.isEditing = false;
     },
 
-    // 2. Guardar cambios (PUT)
+
+// 2. Guardar cambios (PUT)
     async guardarCambios() {
+      // Limpiamos espacios por si acaso
+      const cuerpoTelefono = this.form.numero.trim();
+
+      // Validación: Exactamente 10 dígitos numéricos
+      const regex10Digitos = /^\d{10}$/;
+
+      if (!regex10Digitos.test(cuerpoTelefono)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Teléfono inválido',
+          text: 'Ingresa los 10 dígitos de tu número (Ej: 4141234567).',
+          confirmButtonColor: '#0071e3',
+        });
+        return;
+      }
+
+      // Concatenamos el prefijo fijo
+      const telefonoFinal = '+58' + cuerpoTelefono;
+
       try {
         const token = localStorage.getItem('userToken');
 
-        // Payload sin contraseña (para no cambiarla accidentalmente)
         const payload = {
           nombre: this.form.nombre,
           apellido: this.form.apellido,
-          numero: this.form.numero,
+          numero: telefonoFinal, // Enviamos +58XXXXXXXXXX
           direccion: this.form.direccion
         };
 
         const response = await apiClient.put(`/usuarios/${this.user.correo}`, payload, {
-           headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Emitimos al padre (App.vue) el usuario actualizado
         this.$emit('profile-updated', response.data);
         this.isEditing = false;
 
@@ -192,7 +225,7 @@ export default {
             return '¡Debes escribir una contraseña!';
           }
           if (value.length < 4) {
-             return 'La contraseña debe tener al menos 4 caracteres';
+            return 'La contraseña debe tener al menos 4 caracteres';
           }
         }
       });
@@ -205,7 +238,7 @@ export default {
           const payload = { clavePlana: password };
 
           await apiClient.put(`/usuarios/${this.user.correo}`, payload, {
-             headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` }
           });
 
           Swal.fire('¡Listo!', 'Tu contraseña ha sido actualizada.', 'success');
@@ -410,5 +443,40 @@ export default {
   .user-info-section { flex-direction: column; align-items: center; }
   .avatar-section { width: 100%; margin-bottom: 20px; }
   .form-row { flex-direction: column; gap: 20px; }
+}
+
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Estilo del cuadro gris fijo */
+.fixed-prefix {
+  background-color: #f5f5f7;
+  color: #6e6e73;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap; /* Evita que se rompa la línea */
+  user-select: none;   /* Evita que se seleccione el texto */
+}
+
+/* El input ocupa el resto del espacio */
+.phone-body-input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.phone-body-input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 </style>

@@ -5,6 +5,7 @@
       <button class="btn-create-supplier" @click="mostrarFormularioCrear = true">➕ Nuevo Proveedor</button>
     </div>
 
+    <!-- MODAL CREAR -->
     <div v-if="mostrarFormularioCrear" class="supplier-form-overlay">
       <div class="supplier-form">
         <h3>Registro de Nuevo Proveedor</h3>
@@ -30,7 +31,6 @@
                 v-model="nuevoProveedor.rif"
                 required
                 placeholder="Ej: J-12345678-9"
-
                 pattern="J-\d{8}-\d{1}"
                 title="El RIF debe tener el formato J-12345678-9"
               />
@@ -46,7 +46,6 @@
                 v-model="nuevoProveedor.telefono"
                 required
                 placeholder="Ej: +584121234567"
-
                 pattern="\+58\d{10}"
                 title="El teléfono debe tener el formato +58 seguido de 10 dígitos (ej: +584121234567)"
               />
@@ -95,6 +94,7 @@
       </div>
     </div>
 
+    <!-- LISTA DE PROVEEDORES -->
     <div class="suppliers-list">
       <div v-if="loading && proveedores.length === 0" class="empty-state">
         <p>Cargando proveedores...</p>
@@ -122,11 +122,14 @@
 
           <div class="supplier-actions">
             <button class="btn-edit" @click="editarProveedor(proveedor)">✏️ Editar</button>
+            <!-- BOTÓN ELIMINAR AÑADIDO -->
+            <button class="btn-delete" @click="eliminarProveedor(proveedor.id)">🗑️ Eliminar</button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- MODAL EDITAR -->
     <div v-if="mostrarFormularioEditar" class="supplier-form-overlay">
       <div class="supplier-form">
         <h3>Editar Proveedor</h3>
@@ -140,12 +143,11 @@
 
             <div class="form-group">
               <label for="edit-rif">RIF *</label>
-              <input 
-                type="text" 
-                id="edit-rif" 
-                v-model="datosEditarProveedor.rif" 
-                required 
-                
+              <input
+                type="text"
+                id="edit-rif"
+                v-model="datosEditarProveedor.rif"
+                required
                 pattern="J-\d{8}-\d{1}"
                 title="El RIF debe tener el formato J-12345678-9"/>
             </div>
@@ -154,12 +156,11 @@
           <div class="form-row">
             <div class="form-group">
               <label for="edit-phone">Teléfono *</label>
-              <input 
+              <input
                 type="tel"
-                id="edit-phone" 
-                v-model="datosEditarProveedor.telefono" 
-                required 
-                
+                id="edit-phone"
+                v-model="datosEditarProveedor.telefono"
+                required
                 pattern="\+58\d{10}"
                 title="El teléfono debe tener el formato +58 seguido de 10 dígitos (ej: +584121234567)" />
             </div>
@@ -258,33 +259,29 @@ export default {
     },
 
     async crearProveedor() {
-      // --- ¡NUEVA VALIDACIÓN! ---
       const errorValidacion = this.validarProveedor(this.nuevoProveedor);
       if (errorValidacion) {
         Swal.fire({
           icon: 'warning',
           title: 'Datos inválidos',
-          text: errorValidacion, // Muestra el error específico
+          text: errorValidacion,
           confirmButtonColor: '#0071e3'
         });
         return;
       }
 
-      // --- INICIO DE LA MODIFICACIÓN (AÑADIMOS LA CONFIRMACIÓN) ---
       const result = await Swal.fire({
         title: '¿Crear Proveedor?',
         text: `Se creará el proveedor ${this.nuevoProveedor.nombre}.`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#0071e3', // Botón OK (azul)
-        cancelButtonColor: '#6e6e73', // Botón Cancelar (gris)
+        confirmButtonColor: '#0071e3',
+        cancelButtonColor: '#6e6e73',
         confirmButtonText: 'Sí, crear',
         cancelButtonText: 'Cancelar'
-  })
+      })
 
-  // Si el usuario presiona "Cancelar", la función se detiene aquí.
-  if (!result.isConfirmed) return;
-  // --- FIN DE LA MODIFICACIÓN ---
+      if (!result.isConfirmed) return;
 
       this.loading = true
       const token = localStorage.getItem('userToken');
@@ -312,31 +309,25 @@ export default {
 
       } catch (error) {
         console.error('Error registrando proveedor:', error)
-        // --- INICIO DE LA SECCIÓN MODIFICADA ---
         let errorTitulo = 'Error al registrar';
-        let errorHtml = 'No se pudo registrar el proveedor.'; // Mensaje por defecto
+        let errorHtml = 'No se pudo registrar el proveedor.';
 
         if (error.response) {
-        // error.response.data es el cuerpo del error que envía Spring
-        const errorData = error.response.data;
+          const errorData = error.response.data;
 
-        if (error.response.status === 400) {
-          // Error de VALIDACIÓN (Formato incorrecto)
-          errorTitulo = 'Datos incorrectos';
-          // 'errorData' es un objeto: {rif: "msg1", telefono: "msg2"}
-          const mensajesHtml = Object.values(errorData)
+          if (error.response.status === 400) {
+            errorTitulo = 'Datos incorrectos';
+            const mensajesHtml = Object.values(errorData)
                                 .map(msg => `<li>${msg}</li>`)
                                 .join('');
-          errorHtml = `<p>No se pudo registrar debido a los siguientes errores:</p>
-                    <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
-      
-        } else if (error.response.status === 409) {
-          // Error de CONFLICTO (RIF duplicado)
-          errorTitulo = 'Conflicto de datos';
-          // 'errorData' es un string: "Error: El RIF..."
-          errorHtml = errorData; 
-      }
-    }
+            errorHtml = `<p>No se pudo registrar debido a los siguientes errores:</p>
+                        <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
+
+          } else if (error.response.status === 409) {
+            errorTitulo = 'Conflicto de datos';
+            errorHtml = errorData;
+          }
+        }
         Swal.fire({
           icon: 'error',
           title: errorTitulo,
@@ -355,13 +346,12 @@ export default {
     },
 
     async actualizarProveedor() {
-      // --- ¡NUEVA VALIDACIÓN! ---
       const errorValidacion = this.validarProveedor(this.datosEditarProveedor);
       if (errorValidacion) {
         Swal.fire({
           icon: 'warning',
           title: 'Datos inválidos',
-          text: errorValidacion, // Muestra el error específico
+          text: errorValidacion,
           confirmButtonColor: '#0071e3'
         });
         return;
@@ -409,27 +399,21 @@ export default {
 
       } catch (error) {
         console.error('Error actualizando proveedor:', error)
-
-        // --- INICIO DE LA SECCIÓN MODIFICADA ---
         let errorTitulo = 'Error al actualizar';
-        let errorHtml = 'No se pudo actualizar el proveedor.'; // Mensaje por defecto
+        let errorHtml = 'No se pudo actualizar el proveedor.';
 
         if (error.response) {
           const errorData = error.response.data;
-
           if (error.response.status === 400) {
-            // Error de VALIDACIÓN (Formato incorrecto)
             errorTitulo = 'Datos incorrectos';
             const mensajesHtml = Object.values(errorData)
                                 .map(msg => `<li>${msg}</li>`)
                                 .join('');
-          errorHtml = `<p>No se pudo actualizar debido a los siguientes errores:</p>
-                    <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
-      
+            errorHtml = `<p>No se pudo actualizar debido a los siguientes errores:</p>
+                        <ul style="text-align: left; margin-left: 20px;">${mensajesHtml}</ul>`;
           } else if (error.response.status === 409) {
-            // Error de CONFLICTO (RIF duplicado)
             errorTitulo = 'Conflicto de datos';
-            errorHtml = errorData; 
+            errorHtml = errorData;
           }
         }
         Swal.fire({
@@ -442,32 +426,67 @@ export default {
         this.loading = false
       }
     },
-    // --- ¡MÉTODO DE VALIDACIÓN ACTUALIZADO! ---
+
+    // --- NUEVO: FUNCIONALIDAD DE ELIMINAR PROVEEDOR ---
+    async eliminarProveedor(id) {
+      const result = await Swal.fire({
+        title: '¿Eliminar proveedor?',
+        text: "No podrás revertir esta acción. El proveedor será eliminado permanentemente de la base de datos.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff3b30', // Rojo de alerta
+        cancelButtonColor: '#6e6e73',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        this.loading = true;
+        const token = localStorage.getItem('userToken');
+
+        try {
+          await apiClient.delete(`/proveedores/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          // Eliminar localmente de la lista
+          this.proveedores = this.proveedores.filter(p => p.id !== id);
+
+          Swal.fire(
+            '¡Eliminado!',
+            'El proveedor ha sido eliminado correctamente.',
+            'success'
+          );
+        } catch (error) {
+          console.error("Error al eliminar proveedor:", error);
+          let mensajeError = 'No se pudo eliminar el proveedor. Intente nuevamente.';
+
+          // Manejo específico si el backend rechaza borrar por integridad referencial
+          if(error.response && (error.response.status === 409 || error.response.status === 500)) {
+              mensajeError = 'No se puede eliminar este proveedor porque tiene productos o registros asociados.';
+          }
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: mensajeError,
+            confirmButtonColor: '#0071e3',
+          });
+        } finally {
+          this.loading = false;
+        }
+      }
+    },
+
     validarProveedor(proveedor) {
-      if (!proveedor.nombre || proveedor.nombre.trim() === '') {
-        return 'El campo "Nombre" es obligatorio.';
-      }
-      if (!proveedor.rif || proveedor.rif.trim() === '') {
-        return 'El campo "RIF" es obligatorio.';
-      }
-      if (!proveedor.telefono || proveedor.telefono.trim() === '') {
-        return 'El campo "Teléfono" es obligatorio.';
-      }
-      // Regex simple para validar teléfono (números, +, -)
-      if (!/^[0-9+\-() ]+$/.test(proveedor.telefono)) {
-        return 'El formato del teléfono no es válido.';
-      }
-      if (!proveedor.correo || proveedor.correo.trim() === '') {
-        return 'El campo "Correo" es obligatorio.';
-      }
-      // Regex simple para validar email
-      if (!/^\S+@\S+\.\S+$/.test(proveedor.correo)) {
-        return 'El formato del correo no es válido.';
-      }
-      if (!proveedor.direccion || proveedor.direccion.trim() === '') {
-        return 'El campo "Dirección" es obligatorio.';
-      }
-      return null; // Si todo es válido, devuelve null
+      if (!proveedor.nombre || proveedor.nombre.trim() === '') return 'El campo "Nombre" es obligatorio.';
+      if (!proveedor.rif || proveedor.rif.trim() === '') return 'El campo "RIF" es obligatorio.';
+      if (!proveedor.telefono || proveedor.telefono.trim() === '') return 'El campo "Teléfono" es obligatorio.';
+      if (!/^[0-9+\-() ]+$/.test(proveedor.telefono)) return 'El formato del teléfono no es válido.';
+      if (!proveedor.correo || proveedor.correo.trim() === '') return 'El campo "Correo" es obligatorio.';
+      if (!/^\S+@\S+\.\S+$/.test(proveedor.correo)) return 'El formato del correo no es válido.';
+      if (!proveedor.direccion || proveedor.direccion.trim() === '') return 'El campo "Dirección" es obligatorio.';
+      return null;
     },
 
     limpiarFormularioNuevo() {
@@ -489,15 +508,7 @@ export default {
 
     cancelarEdicion() {
       this.mostrarFormularioEditar = false
-      this.datosEditarProveedor = {
-        id: null,
-        rif: '',
-        nombre: '',
-        telefono: '',
-        correo: '',
-        direccion: '',
-        facturas: [],
-      }
+      this.datosEditarProveedor = { id: null, rif: '', nombre: '', telefono: '', correo: '', direccion: '', facturas: [] }
       this.facturasInput = '';
     },
   },

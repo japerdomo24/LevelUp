@@ -177,6 +177,13 @@ export default {
         if (result.isConfirmed) {
             try {
                 // await apiClient.delete(`/ventas/${ventaId}`); // Descomentar para conectar a API
+                // 1. Obtener el token (igual que en cargarDatosVentas)
+                const token = localStorage.getItem('userToken');
+
+                // 2. LLAMADA REAL AL BACKEND (Descomentada y configurada)
+                await apiClient.delete(`/ventas/${ventaId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
 
                 // Actualización Local (Simulada)
                 this.ventas = this.ventas.filter(v => v.id !== ventaId);

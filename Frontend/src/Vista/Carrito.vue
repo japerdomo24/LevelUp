@@ -77,7 +77,7 @@
             <div v-if="showCardForm" class="add-card-form">
                 <div class="form-title">Nueva Tarjeta</div>
                 <div class="form-group">
-                    <input v-model="newCard.number" type="text" placeholder="Número de tarjeta (16 dígitos)" maxlength="19" class="input-field" />
+                    <input v-model="newCard.number" type="text" placeholder="Número de tarjeta (16-20 dígitos )" maxlength="19" class="input-field" />
                 </div>
                 <div class="form-row">
                     <input v-model="newCard.name" type="text" placeholder="Nombre titular" class="input-field" />
